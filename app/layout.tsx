@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     description: "Empty Console is a team of students who came together due to their love of programming.",
     type: "website",
   },
-    generator: 'v0.app'
+  generator: 'v0.app'
 }
 
 export default function RootLayout({
