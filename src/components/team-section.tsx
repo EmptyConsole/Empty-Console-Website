@@ -7,7 +7,7 @@ const teamMembers = [
   {
     name: "HF_ang",
     role: "Main Programmer & Artist",
-    image: "/young-male-developer-with-creative-style-portrait.jpg",
+    image: "https://placehold.co/400x400/3b82f6/ffffff?text=HF",
     bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. As the main programmer and artist, he brings both technical expertise and creative vision to every project.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
@@ -18,7 +18,7 @@ const teamMembers = [
   {
     name: "ShyGuy",
     role: "Marketing, Communications & Programming",
-    image: "/young-male-student-professional-portrait.jpg",
+    image: "https://placehold.co/400x400/8b5cf6/ffffff?text=SG",
     bio: "ShyGuy handles marketing, presentations, communications, and programming. He discovered technology at a young age and has developed strong skills in leadership and strategy. His ability to coordinate and communicate effectively makes him essential to the team's success.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
@@ -30,7 +30,7 @@ const teamMembers = [
   {
     name: "Emey",
     role: "Music Composer & Contributing Artist",
-    image: "/young-male-musician-artist-creative-portrait.jpg",
+    image: "https://placehold.co/400x400/ec4899/ffffff?text=EM",
     bio: "Emey is the music composer and contributing artist. He began coding later than the other members but learned quickly. He enjoys exploring the intersection of music, art, and programming, bringing a unique audio-visual perspective to the team's projects.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
