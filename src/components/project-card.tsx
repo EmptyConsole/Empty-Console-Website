@@ -10,21 +10,19 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ title, description, learnings, technologies, image }: ProjectCardProps) {
-  // Use a placeholder if no image provided
-  const imageUrl = image || `https://placehold.co/800x450/e5e7eb/6b7280?text=${encodeURIComponent(title)}`
-  
   return (
     <Card className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full">
-      <div className="relative w-full aspect-video overflow-hidden bg-muted">
-        <Image
-          src={imageUrl}
-          alt={`Screenshot of ${title} project`}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-          unoptimized
-        />
-      </div>
+      {image && (
+        <div className="relative w-full aspect-video overflow-hidden">
+          <Image
+            src={image || "/placeholder.svg"}
+            alt={`Screenshot of ${title} project`}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        </div>
+      )}
       <CardContent className="p-6">
         <h4 className="text-xl font-semibold text-primary mb-3">{title}</h4>
         <p className="text-base text-secondary leading-relaxed mb-4">{description}</p>
