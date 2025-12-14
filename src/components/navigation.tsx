@@ -5,6 +5,12 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -15,14 +21,35 @@ const navLinks = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isProjectsDropdownOpen, setIsProjectsDropdownOpen] = useState(false)
+  const dropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10)
     }
     window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (dropdownTimeoutRef.current) {
+        clearTimeout(dropdownTimeoutRef.current)
+      }
+    }
   }, [])
+
+  const handleProjectsMouseEnter = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current)
+      dropdownTimeoutRef.current = null
+    }
+    setIsProjectsDropdownOpen(true)
+  }
+
+  const handleProjectsMouseLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setIsProjectsDropdownOpen(false)
+    }, 150)
+  }
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault()
@@ -31,6 +58,7 @@ export function Navigation() {
       element.scrollIntoView({ behavior: "smooth" })
     }
     setIsOpen(false)
+    setIsProjectsDropdownOpen(false)
   }
 
   return (
@@ -47,17 +75,65 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <ul className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  className="text-sm font-medium text-secondary hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-sm px-1"
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {navLinks.map((link) => {
+              if (link.label === "Projects") {
+                return (
+                  <li
+                    key={link.href}
+                    className="relative"
+                    onMouseEnter={handleProjectsMouseEnter}
+                    onMouseLeave={handleProjectsMouseLeave}
+                  >
+                    <DropdownMenu open={isProjectsDropdownOpen} onOpenChange={setIsProjectsDropdownOpen}>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className="text-sm font-medium text-secondary hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-sm px-1"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleNavClick(e as any, link.href)
+                          }}
+                        >
+                          {link.label}
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        onMouseEnter={handleProjectsMouseEnter}
+                        onMouseLeave={handleProjectsMouseLeave}
+                        className="mt-1"
+                      >
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleNavClick(e as any, "#completed-projects")
+                          }}
+                        >
+                          Completed Projects
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handleNavClick(e as any, "#current-projects")
+                          }}
+                        >
+                          Current Projects
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </li>
+                )
+              }
+              return (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    className="text-sm font-medium text-secondary hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-sm px-1"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              )
+            })}
           </ul>
 
           {/* Mobile Menu Button */}

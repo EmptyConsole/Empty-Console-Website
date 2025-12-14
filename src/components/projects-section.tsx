@@ -126,7 +126,7 @@ export function ProjectsSection() {
         </div>
 
         {/* Completed Projects */}
-        <div className="mb-20">
+        <div id="completed-projects" className="mb-20 scroll-mt-20">
           <h3 className="animate-on-scroll opacity-0 text-2xl font-semibold text-primary mb-8 flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-green-500" aria-hidden="true" />
             Completed Projects
@@ -145,7 +145,7 @@ export function ProjectsSection() {
         </div>
 
         {/* Current Projects */}
-        <div>
+        <div id="current-projects" className="scroll-mt-20">
           <h3 className="animate-on-scroll opacity-0 text-2xl font-semibold text-primary mb-8 flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-accent animate-pulse" aria-hidden="true" />
             Current Projects
