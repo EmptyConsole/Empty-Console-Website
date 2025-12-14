@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,7 +22,7 @@ export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isProjectsDropdownOpen, setIsProjectsDropdownOpen] = useState(false)
-  const dropdownTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -87,7 +87,7 @@ export function Navigation() {
                     <DropdownMenu open={isProjectsDropdownOpen} onOpenChange={setIsProjectsDropdownOpen}>
                       <DropdownMenuTrigger asChild>
                         <button
-                          className="text-sm font-medium text-secondary hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-sm px-1"
+                          className="text-sm font-medium text-secondary hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-md px-3 -mx-1 -my-4 py-4 h-full"
                           onClick={(e) => {
                             e.preventDefault()
                             handleNavClick(e as any, link.href)
@@ -100,12 +100,14 @@ export function Navigation() {
                         onMouseEnter={handleProjectsMouseEnter}
                         onMouseLeave={handleProjectsMouseLeave}
                         className="mt-1"
+                        align="start"
                       >
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.preventDefault()
                             handleNavClick(e as any, "#completed-projects")
                           }}
+                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground"
                         >
                           Completed Projects
                         </DropdownMenuItem>
@@ -114,6 +116,7 @@ export function Navigation() {
                             e.preventDefault()
                             handleNavClick(e as any, "#current-projects")
                           }}
+                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground"
                         >
                           Current Projects
                         </DropdownMenuItem>
@@ -127,7 +130,7 @@ export function Navigation() {
                   <a
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
-                    className="text-sm font-medium text-secondary hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-sm px-1"
+                    className="text-sm font-medium text-secondary hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-md px-3 -mx-1 -my-4 py-4 h-full block"
                   >
                     {link.label}
                   </a>
