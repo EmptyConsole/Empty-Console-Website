@@ -69,7 +69,11 @@ export function Navigation() {
     >
       <nav className="max-w-[1100px] mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <a href="#home" onClick={(e) => handleNavClick(e, "#home")} className="text-xl font-semibold text-primary">
+          <a
+            href="#home"
+            onClick={(e) => handleNavClick(e, "#home")}
+            className="text-xl font-semibold text-primary hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-md px-3 -mx-3 -my-4 py-4 h-full block"
+          >
             Empty Console
           </a>
 
@@ -99,7 +103,7 @@ export function Navigation() {
                       <DropdownMenuContent
                         onMouseEnter={handleProjectsMouseEnter}
                         onMouseLeave={handleProjectsMouseLeave}
-                        className="mt-1"
+                        className="mt-1 p-0 flex flex-col"
                         align="start"
                       >
                         <DropdownMenuItem
@@ -107,7 +111,7 @@ export function Navigation() {
                             e.preventDefault()
                             handleNavClick(e as any, "#completed-projects")
                           }}
-                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground"
+                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground flex-1 flex items-center min-h-[2.5rem]"
                         >
                           Completed Projects
                         </DropdownMenuItem>
@@ -116,7 +120,7 @@ export function Navigation() {
                             e.preventDefault()
                             handleNavClick(e as any, "#current-projects")
                           }}
-                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground"
+                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground flex-1 flex items-center min-h-[2.5rem]"
                         >
                           Current Projects
                         </DropdownMenuItem>
