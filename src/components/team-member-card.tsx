@@ -26,7 +26,7 @@ export function TeamMemberCard({ name, role, image, bio, hobbies, discord }: Tea
           </div>
 
           <h3 className="text-2xl font-semibold text-primary mb-1">{name}</h3>
-          <p className="text-sm font-medium text-muted-foreground mb-4">{role}</p>
+          <p className="text-sm font-medium text-yellow-600 mb-4">{role}</p>
 
           <p className="text-base text-secondary leading-relaxed mb-6">{bio}</p>
 
