@@ -28,7 +28,16 @@ const completedProjects = [
         >
           p5Play
         </a>{" "}
-        game jam that earned Honorable Mention. The game explores ethical decision-making in fast-paced platforming. Players choose to save or kill characters while balancing points and time using three throwable abilities. Features a fully custom physics engine, tilemap system, collision detection, particles, and a level editor coded from scratch.
+        game jam that earned Honorable Mention. The game explores ethical decision-making in fast-paced platforming. Players choose to save or kill characters while balancing points and time using three throwable abilities. Features a fully custom physics engine, tilemap system, collision detection, particles, and a level editor coded from scratch. You can read about it in an{" "}
+        <a
+          href="https://q5js.substack.com/p/p5play-game-jam-2025-results"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          article
+        </a>{" "}
+        written by the creator of p5Play, Quinton Ashley.
       </>
     ),
     learnings: [
