@@ -14,17 +14,15 @@ interface ProjectCardProps {
 export function ProjectCard({ title, description, learnings, technologies, image, url }: ProjectCardProps) {
   return (
     <Card className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full pt-0">
-      {image && (
-        <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
-          <Image
-            src={image || "/placeholder.svg"}
-            alt={`Screenshot of ${title} project`}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-          />
-        </div>
-      )}
+      <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
+        <Image
+          src={image || "/coming-soon.svg"}
+          alt={image ? `Screenshot of ${title} project` : "Coming Soon"}
+          fill
+          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+        />
+      </div>
       <CardContent className="p-6">
         <h4 className="text-xl font-semibold text-primary mb-3">
           {url ? (

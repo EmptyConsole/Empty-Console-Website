@@ -101,7 +101,7 @@ const completedProjects = [
       "Improving teamwork coordination",
     ],
     technologies: ["Platformer Mechanics", "Creative Game Design"],
-    image: "/glitchy-retro-platformer-game-with-visual-bugs-as-.jpg",
+    image: "/buggedout.png",
   },
   {
     title: "Open Stage",
@@ -128,7 +128,7 @@ const completedProjects = [
       "Creating socially impactful technology",
     ],
     technologies: ["Full-Stack Development", "UX Design", "Business Modeling"],
-    image: "/music-streaming-app-interface-for-musicians-with-t.jpg",
+    image: "/openstage.png",
   },
 ]
 
@@ -156,7 +156,6 @@ const currentProjects: Array<{
       "Building scalable file transfer infrastructure",
     ],
     technologies: ["File Synchronization", "Product", "User Solution"],
-    image: "/space-game-with-meteors-and-rope-mechanics-screens.jpg",
   },
 ]
 
