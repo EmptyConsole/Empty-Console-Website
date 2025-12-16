@@ -48,7 +48,7 @@ const completedProjects = [
       "Managing deadlines and collaborating on art and music",
     ],
     technologies: ["p5.js", "JavaScript", "Custom Physics Engine"],
-    image: "/2d-pixel-art-platformer-game-screenshot-with-dark-.jpg",
+    image: "/malice_and_mercy-Picsart-AiImageEnhancer.png",
   },
   {
     title: "Space Looper",

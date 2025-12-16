@@ -13,9 +13,9 @@ interface ProjectCardProps {
 
 export function ProjectCard({ title, description, learnings, technologies, image, url }: ProjectCardProps) {
   return (
-    <Card className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full">
+    <Card className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full pt-0">
       {image && (
-        <div className="relative w-full aspect-video overflow-hidden">
+        <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
           <Image
             src={image || "/placeholder.svg"}
             alt={`Screenshot of ${title} project`}
@@ -57,13 +57,13 @@ export function ProjectCard({ title, description, learnings, technologies, image
           {technologies.map((tech) => {
             const isP5js = tech === "p5.js"
             return (
-              <span key={tech} className="px-3 py-1 bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300 text-xs font-medium rounded-full">
+              <span key={tech} className="px-3 py-1 bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300 text-xs font-medium rounded-full">
                 {isP5js ? (
                   <a
                     href="https://p5js.org/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-700 dark:text-purple-300 hover:underline"
+                    className="text-yellow-700 dark:text-yellow-300 hover:underline"
                   >
                     {tech}
                   </a>
