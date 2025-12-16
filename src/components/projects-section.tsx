@@ -75,7 +75,7 @@ const completedProjects = [
       "Iterative design and precise gameplay mechanics",
     ],
     technologies: ["Game Development", "Resource Management Systems"],
-    image: "/space-game-with-meteors-and-rope-mechanics-screens.jpg",
+    image: "/Untitled_presentation_1-Picsart-AiImageEnhancer.png",
   },
   {
     title: "Bugged Out",
