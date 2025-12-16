@@ -14,6 +14,7 @@ const teamMembers = [
       { icon: "🏓", label: "Ping-pong" },
       { icon: "⛵", label: "Sailing" },
     ],
+    discord: "hfanggamedev",
   },
   {
     name: "ShyGuy",
@@ -24,8 +25,9 @@ const teamMembers = [
       { icon: "🎾", label: "Tennis" },
       { icon: "⛳", label: "Golf" },
       { icon: "⛵", label: "Sailing" },
-      { icon: "🎹", label: "Keyboard/Piano" },
+      { icon: "🎹", label: "Piano" },
     ],
+    discord: "shyguygamedev",
   },
   {
     name: "Emey",
@@ -36,6 +38,7 @@ const teamMembers = [
       { icon: "🎾", label: "Tennis" },
       { icon: "🎹", label: "Piano" },
     ],
+    discord: "qorachniuphorbia",
   },
 ]
 

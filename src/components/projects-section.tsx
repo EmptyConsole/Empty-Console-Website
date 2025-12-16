@@ -1,13 +1,36 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import type React from "react"
 import { ProjectCard } from "@/components/project-card"
 
 const completedProjects = [
   {
     title: "Malice and Mercy",
-    description:
-      "A p5.js platformer created for a competitive game jam that earned Honorable Mention. The game explores ethical decision-making in fast-paced platforming. Players choose to save or kill characters while balancing points and time using three throwable abilities. Features a fully custom physics engine, tilemap system, collision detection, particles, and a level editor coded from scratch.",
+    url: "https://emptyconsole.github.io/Malice-and-Mercy/",
+    description: (
+      <>
+        A{" "}
+        <a
+          href="https://p5js.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          p5.js
+        </a>{" "}
+        platformer created for the{" "}
+        <a
+          href="https://p5play.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          p5Play
+        </a>{" "}
+        game jam that earned Honorable Mention. The game explores ethical decision-making in fast-paced platforming. Players choose to save or kill characters while balancing points and time using three throwable abilities. Features a fully custom physics engine, tilemap system, collision detection, particles, and a level editor coded from scratch.
+      </>
+    ),
     learnings: [
       "Building a full game loop",
       "Implementing custom physics",
@@ -20,8 +43,21 @@ const completedProjects = [
   },
   {
     title: "Space Looper",
-    description:
-      "A GMTK Game Jam strategy game created in a 4-day jam with 9,645 submissions. Players circle meteors with limited rope and energy, managing resources across 20 research centers. The game challenges players with precise movement mechanics and strategic resource allocation.",
+    url: "https://emptyconsole.itch.io/space-looper",
+    description: (
+      <>
+        A{" "}
+        <a
+          href="https://itch.io/jam/gmtk-2025"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          GMTK Game Jam
+        </a>{" "}
+        strategy game created in a 4-day jam with 9,574 submissions. Players circle meteors with limited rope and energy, managing resources across 20 research centers. The game challenges players with precise movement mechanics and strategic resource allocation.
+      </>
+    ),
     learnings: [
       "Rapid prototyping",
       "Designing and balancing custom movement and resource systems",
@@ -34,8 +70,21 @@ const completedProjects = [
   },
   {
     title: "Bugged Out",
-    description:
-      "Created for the Patch Notes Game Jam with the theme 'The Error is the Feature' in a 3-day jam, placing 17th out of 454 entries. This platformer intentionally uses glitches as core gameplay mechanics, requiring players to use logic, memory, and reflexes to navigate levels.",
+    url: "https://emptyconsole.itch.io/bugged-out",
+    description: (
+      <>
+        Created for the{" "}
+        <a
+          href="https://itch.io/jam/patch-notes-v-1-0"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          Patch Notes Game Jam
+        </a>{" "}
+        with the theme &apos;The Error is the Feature&apos; in a 3-day jam, placing 17th out of 474 entries. This platformer intentionally uses glitches as core gameplay mechanics, requiring players to use logic, memory, and reflexes to navigate levels.
+      </>
+    ),
     learnings: [
       "Integrating theme into mechanics",
       "Iterative design and refining platformer feel",
@@ -47,8 +96,21 @@ const completedProjects = [
   },
   {
     title: "Open Stage",
-    description:
-      "A Congressional App Challenge project designed to help musicians earn more revenue via reduced upfront costs and real-time tipping. Empty Console collaborated with local SF Bay Area bands to develop a user-friendly UX and sustainable revenue model. The project placed third in district CA-15.",
+    url: "https://open-stage.vercel.app/signin",
+    description: (
+      <>
+        A{" "}
+        <a
+          href="https://www.congressionalappchallenge.us/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-accent hover:underline"
+        >
+          Congressional App Challenge
+        </a>{" "}
+        project designed to help musicians earn more revenue via reduced upfront costs and real-time tipping. Empty Console collaborated with local SF Bay Area bands to develop a user-friendly UX and sustainable revenue model. The project placed third in district CA-15, one of the hardest and most competitive districts in the nation.
+      </>
+    ),
     learnings: [
       "Full-stack development",
       "UX design and gathering real user feedback",
@@ -61,34 +123,31 @@ const completedProjects = [
   },
 ]
 
-const currentProjects = [
+const currentProjects: Array<{
+  title: string
+  description: string | React.ReactNode
+  learnings: string[]
+  technologies: string[]
+  image?: string
+  url?: string
+}> = [
   {
-    title: "FTC Competitive Robotics",
-    description:
-      "Part of a larger 15-student school team building a PS5-controlled robot for timed challenges. Empty Console handled leadership roles, including task assignment, coordinating subteams, and ensuring progress. The team finished second overall—the school's best result ever.",
+    title: "Real Time File Handler",
+    description: (
+      <>
+        This is a product created to make files easier to transfer in real time across devices. Developers, music producers, and artists can use this to make real time changes to their own specific files that then updates on every device that it exists on.
+      </>
+    ),
     learnings: [
-      "Large-team collaboration",
-      "Leadership and task delegation",
-      "Motivating disengaged members",
-      "Mechanical and software integration",
-      "Iterative problem-solving",
+      "Product design to user needs",
+      "Real-time synchronization systems",
+      "Cross-platform file handling and management",
+      "WebSocket and real-time communication protocols",
+      "File versioning and conflict resolution",
+      "Building scalable file transfer infrastructure",
     ],
-    technologies: ["Robotics", "PS5 Controller Integration", "Team Leadership"],
-    image: "/ftc-robotics-competition-robot-on-field.jpg",
-  },
-  {
-    title: "Future City Competition",
-    description:
-      "Empty Console contributes as part of a larger team designing a city model to solve a featured challenge. Tasks include planning, essay writing, model building, and presenting to judges. The project combines technical problem-solving with creative design thinking.",
-    learnings: [
-      "Collaborative project management",
-      "Design thinking",
-      "Coordinating complex tasks",
-      "Presentation skills",
-      "Creative and technical problem-solving",
-    ],
-    technologies: ["Model Building", "Urban Planning", "Presentation"],
-    image: "/futuristic-city-model-architectural-display.jpg",
+    technologies: ["File Synchronization", "Product", "User Solution"],
+    image: "/space-game-with-meteors-and-rope-mechanics-screens.jpg",
   },
 ]
 
