@@ -19,7 +19,7 @@ const teamMembers = [
   {
     name: "ShyGuy",
     role: "Marketing, Communications & Programming",
-    image: "/ShyGuyPFP.png",
+    image: "/shyguypfp.webp",
     bio: "ShyGuy handles marketing, presentations, communications, and programming. He discovered technology at a young age and has developed strong skills in leadership and strategy. His ability to coordinate and communicate effectively makes him essential to the team's success.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
