@@ -20,8 +20,9 @@ export function TeamMemberCard({ name, role, image, bio, hobbies, discord }: Tea
               src={image || "/placeholder.svg"}
               alt={`Portrait of ${name}, ${role} at Empty Console`}
               fill
-              className="object-cover"
+              className={`object-cover object-center ${name === "ShyGuy" ? "scale-101" : ""}`}
               loading="lazy"
+              unoptimized
             />
           </div>
 
