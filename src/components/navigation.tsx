@@ -5,12 +5,6 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -21,8 +15,9 @@ const navLinks = [
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isProjectsDropdownOpen, setIsProjectsDropdownOpen] = useState(false)
-  const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // const [isProjectsDropdownOpen, setIsProjectsDropdownOpen] = useState(false)
+  // const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // const dropdownContainerRef = useRef<HTMLLIElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,25 +26,25 @@ export function Navigation() {
     window.addEventListener("scroll", handleScroll)
     return () => {
       window.removeEventListener("scroll", handleScroll)
-      if (dropdownTimeoutRef.current) {
-        clearTimeout(dropdownTimeoutRef.current)
-      }
+      // if (dropdownTimeoutRef.current) {
+      //   clearTimeout(dropdownTimeoutRef.current)
+      // }
     }
   }, [])
 
-  const handleProjectsMouseEnter = () => {
-    if (dropdownTimeoutRef.current) {
-      clearTimeout(dropdownTimeoutRef.current)
-      dropdownTimeoutRef.current = null
-    }
-    setIsProjectsDropdownOpen(true)
-  }
+  // const handleProjectsMouseEnter = () => {
+  //   if (dropdownTimeoutRef.current) {
+  //     clearTimeout(dropdownTimeoutRef.current)
+  //     dropdownTimeoutRef.current = null
+  //   }
+  //   setIsProjectsDropdownOpen(true)
+  // }
 
-  const handleProjectsMouseLeave = () => {
-    dropdownTimeoutRef.current = setTimeout(() => {
-      setIsProjectsDropdownOpen(false)
-    }, 150)
-  }
+  // const handleProjectsMouseLeave = () => {
+  //   dropdownTimeoutRef.current = setTimeout(() => {
+  //     setIsProjectsDropdownOpen(false)
+  //   }, 200)
+  // }
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault()
@@ -58,7 +53,7 @@ export function Navigation() {
       element.scrollIntoView({ behavior: "smooth" })
     }
     setIsOpen(false)
-    setIsProjectsDropdownOpen(false)
+    // setIsProjectsDropdownOpen(false)
   }
 
   return (
@@ -80,55 +75,62 @@ export function Navigation() {
           {/* Desktop Navigation */}
           <ul className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => {
-              if (link.label === "Projects") {
-                return (
-                  <li
-                    key={link.href}
-                    className="relative"
-                    onMouseEnter={handleProjectsMouseEnter}
-                    onMouseLeave={handleProjectsMouseLeave}
-                  >
-                    <DropdownMenu open={isProjectsDropdownOpen} onOpenChange={setIsProjectsDropdownOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          className="text-sm font-medium text-secondary hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-md px-3 -mx-1 -my-4 py-4 h-full"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleNavClick(e as any, link.href)
-                          }}
-                        >
-                          {link.label}
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent
-                        onMouseEnter={handleProjectsMouseEnter}
-                        onMouseLeave={handleProjectsMouseLeave}
-                        className="mt-1 p-0 flex flex-col"
-                        align="start"
-                      >
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleNavClick(e as any, "#completed-projects")
-                          }}
-                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground flex-1 flex items-center min-h-[2.5rem]"
-                        >
-                          Completed Projects
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.preventDefault()
-                            handleNavClick(e as any, "#current-projects")
-                          }}
-                          className="hover:!bg-gray-200 dark:hover:!bg-gray-800 focus:!bg-gray-200 dark:focus:!bg-gray-800 hover:!text-foreground focus:!text-foreground flex-1 flex items-center min-h-[2.5rem]"
-                        >
-                          Current Projects
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </li>
-                )
-              }
+              // if (link.label === "Projects") {
+              //   return (
+              //     <li
+              //       key={link.href}
+              //       ref={dropdownContainerRef}
+              //       className="relative"
+              //       onMouseEnter={handleProjectsMouseEnter}
+              //       onMouseLeave={handleProjectsMouseLeave}
+              //     >
+              //       <button
+              //         className="text-sm font-medium text-secondary hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-md px-3 -mx-1 -my-4 py-4 h-full"
+              //         onMouseEnter={handleProjectsMouseEnter}
+              //         onClick={(e) => {
+              //           e.preventDefault()
+              //           handleNavClick(e as any, link.href)
+              //         }}
+              //       >
+              //         {link.label}
+              //       </button>
+              //       {isProjectsDropdownOpen && (
+              //         <>
+              //           {/* Invisible bridge to prevent gap */}
+              //           <div
+              //             className="absolute top-full left-0 right-0 h-1 -mt-1"
+              //             onMouseEnter={handleProjectsMouseEnter}
+              //           />
+              //           <div
+              //             className="absolute top-full left-0 mt-0 bg-popover text-popover-foreground rounded-md border shadow-md min-w-[10rem] z-50 overflow-hidden"
+              //             onMouseEnter={handleProjectsMouseEnter}
+              //           >
+              //             <a
+              //               href="#completed-projects"
+              //               onClick={(e) => {
+              //                 e.preventDefault()
+              //                 handleNavClick(e as any, "#completed-projects")
+              //               }}
+              //               className="block px-3 py-2.5 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 focus:bg-gray-200 dark:focus:bg-gray-800 hover:text-foreground focus:text-foreground focus:outline-none transition-colors"
+              //             >
+              //               Completed Projects
+              //             </a>
+              //             <a
+              //               href="#current-projects"
+              //               onClick={(e) => {
+              //                 e.preventDefault()
+              //                 handleNavClick(e as any, "#current-projects")
+              //               }}
+              //               className="block px-3 py-2.5 text-sm hover:bg-gray-200 dark:hover:bg-gray-800 focus:bg-gray-200 dark:focus:bg-gray-800 hover:text-foreground focus:text-foreground focus:outline-none transition-colors"
+              //             >
+              //               Current Projects
+              //             </a>
+              //           </div>
+              //         </>
+              //       )}
+              //     </li>
+              //   )
+              // }
               return (
                 <li key={link.href}>
                   <a

@@ -167,10 +167,10 @@ export function ProjectsSection() {
 
         {/* Completed Projects */}
         <div id="completed-projects" className="scroll-mt-20">
-          <h3 className="animate-on-scroll opacity-0 text-2xl font-semibold text-primary mb-8 flex items-center gap-3">
+          {/* <h3 className="animate-on-scroll opacity-0 text-2xl font-semibold text-primary mb-8 flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-green-500" aria-hidden="true" />
             Completed Projects
-          </h3>
+          </h3> */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {completedProjects.map((project, index) => (
               <div
