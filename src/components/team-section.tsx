@@ -32,7 +32,7 @@ const teamMembers = [
   {
     name: "Emey",
     role: "Music Composer & Contributing Artist",
-    image: "/young-male-musician-artist-creative-portrait.jpg",
+    image: "/pixilart-1766028338678.png",
     bio: "Emey is the music composer and contributing artist. He began coding later than the other members but learned quickly. He enjoys exploring the intersection of music, art, and programming, bringing a unique audio-visual perspective to the team's projects.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
