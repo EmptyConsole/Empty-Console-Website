@@ -79,7 +79,7 @@ export function TeamSection() {
           {teamMembers.map((member, index) => (
             <div
               key={member.name}
-              className={`animate-on-scroll opacity-0 animate-delay-${(index + 1) * 100}`}
+              className={`animate-on-scroll opacity-0 animate-delay-${(index + 1) * 100} flex`}
               style={{ animationDelay: `${(index + 1) * 100}ms` }}
             >
               <TeamMemberCard {...member} />

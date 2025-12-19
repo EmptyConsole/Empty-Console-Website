@@ -12,9 +12,9 @@ interface TeamMemberCardProps {
 
 export function TeamMemberCard({ name, role, image, bio, hobbies, discord }: TeamMemberCardProps) {
   return (
-    <Card className="group bg-background rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2">
-      <CardContent className="p-6">
-        <div className="flex flex-col items-center text-center">
+    <Card className="group bg-background rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 focus-within:ring-2 focus-within:ring-accent focus-within:ring-offset-2 h-full flex flex-col">
+      <CardContent className="p-6 flex flex-col flex-1">
+        <div className="flex flex-col items-center text-center h-full">
           <div className="relative w-32 h-32 mb-4 rounded-full overflow-hidden shadow-md">
             <Image
               src={image || "/placeholder.svg"}
@@ -29,7 +29,7 @@ export function TeamMemberCard({ name, role, image, bio, hobbies, discord }: Tea
           <h3 className="text-2xl font-semibold text-primary mb-1">{name}</h3>
           <p className="text-sm font-medium text-yellow-600 mb-4">{role}</p>
 
-          <p className="text-base text-secondary leading-relaxed mb-6">{bio}</p>
+          <p className="text-base text-secondary leading-relaxed mb-6 flex-1">{bio}</p>
 
           <div className="w-full mb-6">
             <p className="text-sm font-medium text-muted-foreground mb-3">Hobbies</p>
