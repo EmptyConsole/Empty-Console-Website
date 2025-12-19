@@ -6,7 +6,7 @@ import { TeamMemberCard } from "@/components/team-member-card"
 const teamMembers = [
   {
     name: "HF_ang",
-    role: "Main Programmer & Artist",
+    role: "Programmer & Artist",
     image: "/HF_ang PFP.png",
     bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. As the main programmer and artist, he brings both technical expertise and creative vision to every project.",
     hobbies: [
@@ -31,7 +31,7 @@ const teamMembers = [
   },
   {
     name: "Emey",
-    role: "Music Composer & Contributing Artist",
+    role: "Music Composer & Artist",
     image: "/pixilart-1766028338678.png",
     bio: "Emey is the music composer and contributing artist. He began coding later than the other members but learned quickly. He enjoys exploring the intersection of music, art, and programming, bringing a unique audio-visual perspective to the team's projects.",
     hobbies: [
