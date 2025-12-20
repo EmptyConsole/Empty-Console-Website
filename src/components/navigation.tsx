@@ -5,6 +5,7 @@ import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Image from "next/image"
 
 const navLinks = [
   { href: "#home", label: "Home" },
@@ -67,8 +68,16 @@ export function Navigation() {
           <a
             href="#home"
             onClick={(e) => handleNavClick(e, "#home")}
-            className="text-xl font-semibold text-primary hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-md px-3 -mx-3 -my-4 py-4 h-full block"
+            className="flex items-center gap-2 text-xl font-semibold text-primary hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 rounded-md px-3 -mx-3 -my-4 py-4 h-full"
           >
+            <Image
+              src="/EmptyConsoleLogo.png"
+              alt="Empty Console Logo"
+              width={32}
+              height={32}
+              className="object-contain"
+              unoptimized
+            />
             Empty Console
           </a>
 

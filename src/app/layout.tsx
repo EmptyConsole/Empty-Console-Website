@@ -18,6 +18,11 @@ export const metadata: Metadata = {
     description: "Empty Console is a team of students who came together due to their love of programming.",
     type: "website",
   },
+  icons: {
+    icon: "/EmptyConsoleLogo.png",
+    shortcut: "/EmptyConsoleLogo.png",
+    apple: "/EmptyConsoleLogo.png",
+  },
   // generator: 'v0.app'
 }
 
