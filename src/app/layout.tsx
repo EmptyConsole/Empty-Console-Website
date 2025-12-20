@@ -10,11 +10,11 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Empty Console | Professional Top Grade Software Development Team",
+  title: "Empty Console | Top Grade Software Development Team",
   description:
     "Empty Console is a team of students who came together due to their love of programming. Explore our projects, meet the team, and see what we've built.",
   openGraph: {
-    title: "Empty Console | Professional Top Grade Software Development Team",
+    title: "Empty Console | Top Grade Software Development Team",
     description: "Empty Console is a team of students who came together due to their love of programming.",
     type: "website",
   },
