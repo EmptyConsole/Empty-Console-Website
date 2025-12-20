@@ -10,15 +10,15 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "Empty Console | Student Tech Team Portfolio",
+  title: "Empty Console | Professional Top Grade Software Development Team",
   description:
     "Empty Console is a team of students who came together due to their love of programming. Explore our projects, meet the team, and see what we've built.",
   openGraph: {
-    title: "Empty Console | Student Tech Team Portfolio",
+    title: "Empty Console | Professional Top Grade Software Development Team",
     description: "Empty Console is a team of students who came together due to their love of programming.",
     type: "website",
   },
-  generator: 'v0.app'
+  // generator: 'v0.app'
 }
 
 export default function RootLayout({
