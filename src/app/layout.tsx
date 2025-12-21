@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/EmptyConsoleLogo.png",
+        url: "/EmptyConsoleLogoNew.jpg",
         width: 1200,
         height: 630,
         alt: "Empty Console Logo",
@@ -27,9 +27,9 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    icon: "/EmptyConsoleLogo.png",
-    shortcut: "/EmptyConsoleLogo.png",
-    apple: "/EmptyConsoleLogo.png",
+    icon: "/EmptyConsoleLogoNew.jpg",
+    shortcut: "/EmptyConsoleLogoNew.jpg",
+    apple: "/EmptyConsoleLogoNew.jpg",
   },
   // generator: 'v0.app'
 }

@@ -1,11 +1,23 @@
 import { Mail } from "lucide-react"
+import Image from "next/image"
 
 export function Footer() {
   return (
     <footer className="py-12 bg-primary text-primary-foreground">
       <div className="max-w-[1100px] mx-auto px-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-sm">© 2025 Empty Console</p>
+          {/* <p className="text-sm">© 2025 Empty Console</p> */}
+          <div className="flex items-center gap-2">
+            <Image
+              src="/EmptyConsoleLogoNew.jpg"
+              alt="Empty Console Logo"
+              width={24}
+              height={24}
+              className="object-contain"
+              unoptimized
+            />
+            <p className="text-sm">Empty Console</p>
+          </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8">
             <a
