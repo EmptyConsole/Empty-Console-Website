@@ -6,7 +6,7 @@ import { TeamMemberCard } from "@/components/team-member-card"
 const teamMembers = [
   {
     name: "HF_ang",
-    role: "Co-Founder & CTO",
+    role: "Co-Founder",
     image: "/HF_ang PFP.png",
     bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. As the main programmer and artist, he brings both technical expertise and creative vision to every project.",
     hobbies: [
@@ -18,7 +18,7 @@ const teamMembers = [
   },
   {
     name: "ShyGuy",
-    role: "Co-Founder & CEO",
+    role: "Co-Founder",
     image: "/images (1).jpeg",
     bio: "ShyGuy handles marketing, presentations, communications, and programming. He discovered technology at a young age and has developed strong skills in leadership and strategy. His ability to coordinate and communicate effectively makes him essential to the team's success.",
     hobbies: [
@@ -31,7 +31,7 @@ const teamMembers = [
   },
   {
     name: "Emey",
-    role: "Co-Founder & CPO",
+    role: "Co-Founder",
     image: "/pixilart-1766028338678.png",
     bio: "Emey is the music composer and and an artist on the team. He began coding later than the other members but learned extremely quickly. He enjoys exploring the intersection of music, art, and programming, bringing a unique audio-visual perspective to the team's projects.",
     hobbies: [
