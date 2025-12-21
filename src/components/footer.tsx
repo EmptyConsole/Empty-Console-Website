@@ -9,7 +9,7 @@ export function Footer() {
           {/* <p className="text-sm">© 2025 Empty Console</p> */}
           <div className="flex items-center gap-2">
             <Image
-              src="/EmptyConsoleLogoNew.jpg"
+              src="/BetterEmptyConsoleLogo.png"
               alt="Empty Console Logo"
               width={24}
               height={24}
