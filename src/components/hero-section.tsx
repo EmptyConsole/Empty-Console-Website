@@ -214,12 +214,47 @@ export function HeroSection() {
   }
 
   return (
-    <section
-      id="home"
-      ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center py-[100px] pt-[72px] overflow-hidden"
-      style={{ background: 'transparent' }}
-    >
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        .hero-text {
+          color: black;
+        }
+        @media (min-width: 768px) {
+          .hero-text {
+            color: #facc15;
+          }
+        }
+        .hero-text-h1 {
+          text-shadow: none;
+        }
+        @media (min-width: 768px) {
+          .hero-text-h1 {
+            text-shadow: -4px -4px 0 black, 4px -4px 0 black, -4px 4px 0 black, 4px 4px 0 black, -4px 0 0 black, 4px 0 0 black, 0 -4px 0 black, 0 4px 0 black, -3px -3px 0 black, 3px -3px 0 black, -3px 3px 0 black, 3px 3px 0 black, -3px 0 0 black, 3px 0 0 black, 0 -3px 0 black, 0 3px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black, 2px 2px 0 black, -2px 0 0 black, 2px 0 0 black, 0 -2px 0 black, 0 2px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black, -1px 0 0 black, 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black;
+          }
+        }
+        .hero-text-p {
+          text-shadow: none;
+        }
+        @media (min-width: 768px) {
+          .hero-text-p {
+            text-shadow: -2.5px -2.5px 0 black, 2.5px -2.5px 0 black, -2.5px 2.5px 0 black, 2.5px 2.5px 0 black, -2.5px 0 0 black, 2.5px 0 0 black, 0 -2.5px 0 black, 0 2.5px 0 black, -1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black;
+          }
+        }
+        .hero-text-p2 {
+          text-shadow: none;
+        }
+        @media (min-width: 768px) {
+          .hero-text-p2 {
+            text-shadow: -1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black;
+          }
+        }
+      `}} />
+      <section
+        id="home"
+        ref={sectionRef}
+        className="relative min-h-screen flex items-center justify-center py-[100px] pt-[72px] overflow-hidden"
+        style={{ background: 'transparent' }}
+      >
       {/* Video background - positioned below header - hidden on mobile, visible on desktop */}
       {videoList.length > 0 && videoList[currentVideoIndex] && (
         <video
@@ -253,21 +288,13 @@ export function HeroSection() {
 
       <div className="max-w-[1100px] mx-auto px-6 text-center" style={{ position: 'relative', zIndex: 10 }}>
         <h1 
-          className="animate-on-scroll text-5xl md:text-6xl lg:text-[48px] font-semibold mb-6 text-balance"
-          style={{
-            color: '#facc15',
-            textShadow: '-4px -4px 0 black, 4px -4px 0 black, -4px 4px 0 black, 4px 4px 0 black, -4px 0 0 black, 4px 0 0 black, 0 -4px 0 black, 0 4px 0 black, -3px -3px 0 black, 3px -3px 0 black, -3px 3px 0 black, 3px 3px 0 black, -3px 0 0 black, 3px 0 0 black, 0 -3px 0 black, 0 3px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black, 2px 2px 0 black, -2px 0 0 black, 2px 0 0 black, 0 -2px 0 black, 0 2px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black, -1px 0 0 black, 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black'
-          }}
+          className="animate-on-scroll text-5xl md:text-6xl lg:text-[48px] font-semibold mb-6 text-balance hero-text hero-text-h1"
         >
           Welcome to Empty Console
         </h1>
 
         <p 
-          className="animate-on-scroll animate-delay-100 text-lg md:text-xl max-w-3xl mx-auto mb-8 leading-relaxed text-pretty"
-          style={{
-            color: '#facc15',
-            textShadow: '-2.5px -2.5px 0 black, 2.5px -2.5px 0 black, -2.5px 2.5px 0 black, 2.5px 2.5px 0 black, -2.5px 0 0 black, 2.5px 0 0 black, 0 -2.5px 0 black, 0 2.5px 0 black, -1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black'
-          }}
+          className="animate-on-scroll animate-delay-100 text-lg md:text-xl max-w-3xl mx-auto mb-8 leading-relaxed text-pretty hero-text hero-text-p"
         >
           Empty Console is a team of students who came together due to their love of programming. From a shared passion,
           the team has evolved into a collaborative space where each member can pursue their unique talents, contribute
@@ -275,11 +302,7 @@ export function HeroSection() {
         </p>
 
         <p 
-          className="animate-on-scroll animate-delay-200 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed text-pretty"
-          style={{
-            color: '#facc15',
-            textShadow: '-1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black'
-          }}
+          className="animate-on-scroll animate-delay-200 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed text-pretty hero-text hero-text-p2"
         >
           Each member brings a unique perspective, balancing technical expertise, creativity, and teamwork to produce
           innovative projects.
@@ -298,5 +321,6 @@ export function HeroSection() {
         </div>
       </div>
     </section>
+    </>
   )
 }
