@@ -74,14 +74,14 @@ export function TeamSection() {
 
   return (
     <section id="team" ref={sectionRef} className="py-[100px] bg-card">
-      {/* Hidden logo image before HF_ang's picture */}
-      <div className="opacity-0 w-0 h-0 overflow-hidden pointer-events-none fixed -z-10">
+      {/* Hidden logo image before HF_ang's picture - with proper dimensions for crawlers */}
+      <div className="absolute left-[-9999px] w-[1200px] h-[630px] opacity-0 pointer-events-none">
         <Image
           src="/BetterEmptyConsoleLogo.png"
-          alt=""
-          width={1}
-          height={1}
-          loading="eager"
+          alt="Empty Console Logo"
+          width={1200}
+          height={630}
+          priority
           unoptimized
         />
       </div>
