@@ -220,11 +220,11 @@ export function HeroSection() {
       className="relative min-h-screen flex items-center justify-center py-[100px] pt-[72px] overflow-hidden"
       style={{ background: 'transparent' }}
     >
-      {/* Video background - positioned below header */}
+      {/* Video background - positioned below header - hidden on mobile, visible on desktop */}
       {videoList.length > 0 && videoList[currentVideoIndex] && (
         <video
           ref={videoRef}
-          className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] object-contain"
+          className="hidden md:block absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] object-contain"
           style={{ 
             zIndex: 0,
             opacity: isVideoReady ? 1 : 0,
