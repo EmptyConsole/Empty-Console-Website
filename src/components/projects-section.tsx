@@ -8,6 +8,7 @@ const completedProjects = [
   {
     title: "Malice and Mercy",
     url: "https://emptyconsole.github.io/Malice-and-Mercy/",
+    date: "June 2025",
     description: (
       <>
         A{" "}
@@ -53,6 +54,7 @@ const completedProjects = [
   {
     title: "Space Looper",
     url: "https://emptyconsole.itch.io/space-looper",
+    date: "August 2025",
     description: (
       <>
         A{" "}
@@ -80,6 +82,7 @@ const completedProjects = [
   {
     title: "Bugged Out",
     url: "https://emptyconsole.itch.io/bugged-out",
+    date: "September 2025",
     description: (
       <>
         Created for the{" "}
@@ -106,6 +109,7 @@ const completedProjects = [
   {
     title: "Open Stage",
     url: "https://open-stage.vercel.app/signin",
+    date: "October 2025",
     description: (
       <>
         A{" "}

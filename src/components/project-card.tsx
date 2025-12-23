@@ -9,9 +9,10 @@ interface ProjectCardProps {
   technologies: string[]
   image?: string
   url?: string
+  date?: string
 }
 
-export function ProjectCard({ title, description, learnings, technologies, image, url }: ProjectCardProps) {
+export function ProjectCard({ title, description, learnings, technologies, image, url, date }: ProjectCardProps) {
   return (
     <Card className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full pt-0">
       <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
@@ -23,7 +24,12 @@ export function ProjectCard({ title, description, learnings, technologies, image
           loading="lazy"
         />
       </div>
-      <CardContent className="p-6">
+      <CardContent className="pt-3 px-6 pb-6">
+        {date && (
+          <p className="text-sm text-muted-foreground mb-3">
+            {date}
+          </p>
+        )}
         <h4 className="text-xl font-semibold text-primary mb-3">
           {url ? (
             <a
