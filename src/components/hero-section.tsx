@@ -242,7 +242,7 @@ export function HeroSection() {
       )}
 
       {/* Dark overlay for better text readability */}
-      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] bg-background/15" style={{ zIndex: 1, top: '72px' }} />
+      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] bg-background/21" style={{ zIndex: 1, top: '72px' }} />
 
       {/* Abstract gradient background overlay */}
       <div className="absolute inset-0" style={{ zIndex: 2 }}>
