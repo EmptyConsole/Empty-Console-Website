@@ -7,7 +7,8 @@ const teamMembers = [
   {
     name: "HF_ang",
     role: "Co-Founder",
-    image: "/HF_ang PFP.png",
+    // image: "/HF_ang PFP.png",
+    image: "/BetterEmptyConsoleLogo.png",
     bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. As the main programmer and artist, he brings both technical expertise and creative vision to every project.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
