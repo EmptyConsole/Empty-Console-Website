@@ -1,6 +1,9 @@
+"use client"
+
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import type React from "react"
+import { useState, useRef, useEffect } from "react"
 
 interface ProjectCardProps {
   title: string
@@ -8,21 +11,110 @@ interface ProjectCardProps {
   learnings: string[]
   technologies: string[]
   image?: string
+  video?: string
   url?: string
   date?: string
 }
 
-export function ProjectCard({ title, description, learnings, technologies, image, url, date }: ProjectCardProps) {
+export function ProjectCard({ title, description, learnings, technologies, image, video, url, date }: ProjectCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+  const [isDesktop, setIsDesktop] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const SKIP_START = 1.5 // seconds to skip at start
+  const SKIP_END = 1.5 // seconds to skip at end
+
+  // Detect if device is desktop (not touch device and has hover capability)
+  useEffect(() => {
+    const checkIsDesktop = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+      const hasHover = window.matchMedia('(hover: hover)').matches
+      const isLargeScreen = window.matchMedia('(min-width: 1024px)').matches
+      setIsDesktop(!hasTouch && hasHover && isLargeScreen)
+    }
+
+    checkIsDesktop()
+    window.addEventListener('resize', checkIsDesktop)
+    return () => window.removeEventListener('resize', checkIsDesktop)
+  }, [])
+
+  useEffect(() => {
+    const videoElement = videoRef.current
+    if (!videoElement || !video || !isHovered || !isDesktop) return
+
+    const handleTimeUpdate = () => {
+      if (videoElement.duration) {
+        const maxTime = videoElement.duration - SKIP_END
+        if (videoElement.currentTime >= maxTime) {
+          videoElement.currentTime = SKIP_START
+        }
+      }
+    }
+
+    const handleLoadedMetadata = () => {
+      videoElement.currentTime = SKIP_START
+      videoElement.play().catch(() => {
+        // Ignore autoplay errors
+      })
+    }
+
+    videoElement.addEventListener("timeupdate", handleTimeUpdate)
+    videoElement.addEventListener("loadedmetadata", handleLoadedMetadata)
+
+    // Set initial time when video loads
+    if (videoElement.readyState >= 1) {
+      videoElement.currentTime = SKIP_START
+      videoElement.play().catch(() => {
+        // Ignore autoplay errors
+      })
+    }
+
+    return () => {
+      videoElement.removeEventListener("timeupdate", handleTimeUpdate)
+      videoElement.removeEventListener("loadedmetadata", handleLoadedMetadata)
+    }
+  }, [isHovered, video, isDesktop])
+
+  const handleMouseEnter = () => {
+    if (video && isDesktop) {
+      setIsHovered(true)
+    }
+  }
+
+  const handleMouseLeave = () => {
+    if (video && isDesktop) {
+      setIsHovered(false)
+      if (videoRef.current) {
+        videoRef.current.pause()
+        videoRef.current.currentTime = 0
+      }
+    }
+  }
+
   return (
-    <Card className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full pt-0">
+    <Card 
+      className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full pt-0"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
-        <Image
-          src={image || "/coming-soon.svg"}
-          alt={image ? `Screenshot of ${title} project` : "Coming Soon"}
-          fill
-          className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-        />
+        {video && isHovered && isDesktop ? (
+          <video
+            ref={videoRef}
+            src={video}
+            className="absolute inset-0 w-full h-full object-contain"
+            muted
+            playsInline
+            loop={false}
+          />
+        ) : (
+          <Image
+            src={image || "/coming-soon.svg"}
+            alt={image ? `Screenshot of ${title} project` : "Coming Soon"}
+            fill
+            className="object-cover object-top transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        )}
       </div>
       <CardContent className="pt-3 px-6 pb-6">
         {date && (

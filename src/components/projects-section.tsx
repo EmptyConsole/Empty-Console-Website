@@ -50,6 +50,7 @@ const completedProjects = [
     ],
     technologies: ["p5.js", "JavaScript", "Custom Physics Engine"],
     image: "/malice_and_mercy-Picsart-AiImageEnhancer.png",
+    video: "/Clips/MaliceAndMercy.mp4",
   },
   {
     title: "Space Looper",
@@ -78,6 +79,7 @@ const completedProjects = [
     ],
     technologies: ["Game Development", "Resource Management Systems"],
     image: "/Untitled_presentation_1-Picsart-AiImageEnhancer.png",
+    video: "/Clips/SpaceLooper.mp4",
   },
   {
     title: "Bugged Out",
@@ -105,6 +107,7 @@ const completedProjects = [
     ],
     technologies: ["Platformer Mechanics", "Creative Game Design"],
     image: "/buggedout.png",
+    video: "/Clips/BuggedOut.mp4",
   },
   {
     title: "Open Stage",
@@ -133,6 +136,7 @@ const completedProjects = [
     ],
     technologies: ["Full-Stack Development", "UX Design", "Business Modeling"],
     image: "/openstage.png",
+    video: "/Clips/OpenStage.mp4",
   },
 ]
 
