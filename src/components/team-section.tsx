@@ -8,6 +8,7 @@ const teamMembers = [
   {
     name: "HF_ang",
     role: "Co-Founder",
+    // Hidden logo image before HF_ang's picture
     image: "/HF_ang PFP.png",
     // image: "/BetterEmptyConsoleLogo.png",
     bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. As the main programmer and artist, he brings both technical expertise and creative vision to every project.",
@@ -47,6 +48,12 @@ const teamMembers = [
 export function TeamSection() {
   const sectionRef = useRef<HTMLElement>(null)
 
+  // Preload BetterEmptyConsoleLogo.png before HF_ang's picture
+  useEffect(() => {
+    const img = new window.Image()
+    img.src = "/BetterEmptyConsoleLogo.png"
+  }, [])
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -67,6 +74,17 @@ export function TeamSection() {
 
   return (
     <section id="team" ref={sectionRef} className="py-[100px] bg-card">
+      {/* Hidden logo image before HF_ang's picture */}
+      <div className="opacity-0 w-0 h-0 overflow-hidden pointer-events-none fixed -z-10">
+        <Image
+          src="/BetterEmptyConsoleLogo.png"
+          alt=""
+          width={1}
+          height={1}
+          loading="eager"
+          unoptimized
+        />
+      </div>
       <div className="max-w-[1100px] mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="animate-on-scroll opacity-0 text-4xl md:text-[32px] font-semibold text-primary mb-4">
@@ -75,18 +93,6 @@ export function TeamSection() {
           <p className="animate-on-scroll opacity-0 animate-delay-100 text-lg text-muted-foreground max-w-2xl mx-auto">
             Meet the talented individuals behind our innovative projects
           </p>
-        </div>
-
-        {/* Hidden logo image before HF_ang's picture */}
-        <div className="opacity-0 w-0 h-0 overflow-hidden pointer-events-none fixed -z-10">
-          <Image
-            src="/BetterEmptyConsoleLogo.png"
-            alt=""
-            width={1}
-            height={1}
-            loading="eager"
-            unoptimized
-          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
