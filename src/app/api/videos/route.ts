@@ -1,26 +1,30 @@
-import { NextResponse } from "next/server"
-import { readdir } from "fs/promises"
-import { join } from "path"
+import { NextResponse } from 'next/server'
+import fs from 'fs'
+import path from 'path'
 
 export async function GET() {
   try {
-    const clipsDirectory = join(process.cwd(), "public", "Clips")
-    const files = await readdir(clipsDirectory)
+    const clipsDirectory = path.join(process.cwd(), 'public', 'Clips')
     
-    // Filter for video files (mp4, mov, webm, etc.)
-    const videoExtensions = [".mp4", ".mov", ".webm", ".avi", ".mkv"]
-    const videoFiles = files
-      .filter((file) => 
-        videoExtensions.some((ext) => file.toLowerCase().endsWith(ext))
-      )
-      .map((file) => `/Clips/${file}`)
-      .sort() // Sort alphabetically for consistent ordering
+    // Check if directory exists
+    if (!fs.existsSync(clipsDirectory)) {
+      console.error('Clips directory not found:', clipsDirectory)
+      return NextResponse.json({ videos: [] })
+    }
     
-    return NextResponse.json({ videos: videoFiles })
+    const files = fs.readdirSync(clipsDirectory)
+    const videos = files
+      .filter(file => {
+        const ext = file.toLowerCase()
+        return ext.endsWith('.mp4') || ext.endsWith('.webm') || ext.endsWith('.mov')
+      })
+      .map(file => `/Clips/${file}`)
+    
+    console.log('Videos found:', videos)
+    
+    return NextResponse.json({ videos })
   } catch (error) {
-    console.error("Error reading video directory:", error)
-    // Fallback to empty array if directory doesn't exist
-    return NextResponse.json({ videos: [] })
+    console.error('Error reading clips directory:', error)
+    return NextResponse.json({ videos: [] }, { status: 500 })
   }
 }
-

@@ -41,6 +41,12 @@ export const metadata: Metadata = {
       },
     ],
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Empty Console | Top Grade Software Development Team",
+    description: "Empty Console is a team of students who came together due to their love of programming.",
+    images: ["/BetterEmptyConsoleLogo.png"],
+  },
   icons: {
     icon: "/BetterEmptyConsoleLogo.png",
     shortcut: "/BetterEmptyConsoleLogo.png",

@@ -19,6 +19,7 @@ export function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoList, setVideoList] = useState<string[]>([])
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
+  const [isVideoReady, setIsVideoReady] = useState(false)
 
   // Fetch video list from API (automatically detects all videos in /public/Clips)
   useEffect(() => {
@@ -30,23 +31,31 @@ export function HeroSection() {
         }
         const data = await response.json()
         if (data.videos && data.videos.length > 0) {
-          // Shuffle the videos for random order
-          setVideoList(shuffleArray(data.videos))
+          const shuffled = shuffleArray(data.videos as string[])
+          setVideoList(shuffled)
+          console.log("Videos loaded:", shuffled)
         } else {
           console.warn("No videos found in API response")
+          useFallbackVideos()
         }
       } catch (error) {
         console.error("Error fetching videos:", error)
-        // Fallback to hardcoded list if API fails
-        const fallbackVideos = [
-          "/Clips/OpenStage.mp4",
-          "/Clips/SpaceLooper.mp4",
-          "/Clips/BuggedOut.mp4",
-          "/Clips/MaliceAndMercy.mp4",
-        ]
-        setVideoList(shuffleArray(fallbackVideos))
+        useFallbackVideos()
       }
     }
+
+    const useFallbackVideos = () => {
+      const fallbackVideos = [
+        "/Clips/OpenStage.mp4",
+        "/Clips/SpaceLooper.mp4",
+        "/Clips/BuggedOut.mp4",
+        "/Clips/MaliceAndMercy.mp4",
+      ]
+      const shuffled = shuffleArray(fallbackVideos)
+      setVideoList(shuffled)
+      console.log("Using fallback videos:", shuffled)
+    }
+
     fetchVideos()
   }, [])
 
@@ -55,82 +64,127 @@ export function HeroSection() {
     const video = videoRef.current
     if (!video || videoList.length === 0) return
 
-    const SKIP_START = 1.5 // seconds
-    const SKIP_END = 1.5 // seconds
+    const SKIP_START = 1.5
+    const SKIP_END = 1.5
     let isTransitioning = false
 
+    // Ensure video starts at SKIP_START and doesn't go beyond duration - SKIP_END
+    const enforceTimeBounds = () => {
+      if (!video.duration) return
+      
+      // If video is too short, just play it normally
+      if (video.duration <= SKIP_START + SKIP_END) {
+        return
+      }
+
+      // Ensure we don't play the first 1.5 seconds
+      if (video.currentTime < SKIP_START) {
+        video.currentTime = SKIP_START
+      }
+
+      // Ensure we don't play the last 1.5 seconds
+      if (video.currentTime >= video.duration - SKIP_END) {
+        isTransitioning = true
+        const nextIndex = (currentVideoIndex + 1) % videoList.length
+        console.log("Reached end threshold, moving to next video:", nextIndex)
+        setCurrentVideoIndex(nextIndex)
+      }
+    }
+
     const handleLoadedMetadata = () => {
-      // Set start time to skip first 1.5 seconds
       if (video.duration && video.duration > SKIP_START + SKIP_END) {
         video.currentTime = SKIP_START
       }
+      setIsVideoReady(true)
+      console.log("Video metadata loaded, duration:", video.duration)
+    }
+
+    const handleSeeked = () => {
+      // Ensure we're still within bounds after seeking
+      enforceTimeBounds()
     }
 
     const handleCanPlay = async () => {
       isTransitioning = false
-      // Start playing when video is ready
+      // Ensure we start at SKIP_START
+      if (video.duration && video.duration > SKIP_START + SKIP_END) {
+        if (video.currentTime < SKIP_START) {
+          video.currentTime = SKIP_START
+        }
+      }
+      console.log("Video can play")
       try {
         await video.play()
+        console.log("Video playing successfully")
       } catch (error) {
         console.error("Error playing video:", error)
-        // Try again after a short delay
         setTimeout(() => {
-          video.play().catch(console.error)
+          video.play().catch(e => console.error("Retry failed:", e))
         }, 100)
       }
     }
 
     const handleLoadedData = () => {
-      // Also try to play when data is loaded
+      // Ensure we start at SKIP_START
+      if (video.duration && video.duration > SKIP_START + SKIP_END) {
+        if (video.currentTime < SKIP_START) {
+          video.currentTime = SKIP_START
+        }
+      }
       if (video.paused) {
-        video.play().catch(console.error)
+        video.play().catch(e => console.error("Play on loaded data failed:", e))
       }
     }
 
     const handleTimeUpdate = () => {
-      if (
-        !isTransitioning &&
-        video.duration &&
-        video.currentTime >= video.duration - SKIP_END
-      ) {
-        // If we've reached the last 1.5 seconds, move to next video
-        isTransitioning = true
-        const nextIndex = (currentVideoIndex + 1) % videoList.length
-        setCurrentVideoIndex(nextIndex)
-      }
+      if (isTransitioning) return
+      enforceTimeBounds()
     }
 
     const handleEnded = () => {
       if (!isTransitioning) {
         isTransitioning = true
         const nextIndex = (currentVideoIndex + 1) % videoList.length
+        console.log("Video ended, moving to:", nextIndex)
         setCurrentVideoIndex(nextIndex)
       }
     }
 
+    const handleError = (e: Event) => {
+      console.error("Video error:", e, video.error)
+    }
+
     video.addEventListener("loadedmetadata", handleLoadedMetadata)
+    video.addEventListener("seeked", handleSeeked)
     video.addEventListener("canplay", handleCanPlay)
     video.addEventListener("loadeddata", handleLoadedData)
     video.addEventListener("timeupdate", handleTimeUpdate)
     video.addEventListener("ended", handleEnded)
+    video.addEventListener("error", handleError)
 
-    // Ensure video loads and plays
     video.load()
     
-    // Force play attempt after load
     const playTimeout = setTimeout(() => {
       if (video.paused && video.readyState >= 2) {
-        video.play().catch(console.error)
+        // Ensure we start at SKIP_START before playing
+        if (video.duration && video.duration > SKIP_START + SKIP_END) {
+          if (video.currentTime < SKIP_START) {
+            video.currentTime = SKIP_START
+          }
+        }
+        video.play().catch(e => console.error("Delayed play failed:", e))
       }
     }, 500)
 
     return () => {
       clearTimeout(playTimeout)
       video.removeEventListener("loadedmetadata", handleLoadedMetadata)
+      video.removeEventListener("seeked", handleSeeked)
       video.removeEventListener("canplay", handleCanPlay)
       video.removeEventListener("loadeddata", handleLoadedData)
       video.removeEventListener("timeupdate", handleTimeUpdate)
       video.removeEventListener("ended", handleEnded)
+      video.removeEventListener("error", handleError)
     }
   }, [videoList, currentVideoIndex])
 
@@ -163,13 +217,20 @@ export function HeroSection() {
     <section
       id="home"
       ref={sectionRef}
-      className="relative min-h-screen flex items-center justify-center py-[100px] overflow-hidden"
+      className="relative min-h-screen flex items-center justify-center py-[100px] pt-[72px] overflow-hidden"
+      style={{ background: 'transparent' }}
     >
-      {/* Video background */}
+      {/* Video background - positioned below header */}
       {videoList.length > 0 && videoList[currentVideoIndex] && (
         <video
           ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover -z-20"
+          className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] object-contain"
+          style={{ 
+            zIndex: 0,
+            opacity: isVideoReady ? 1 : 0,
+            transition: 'opacity 0.3s ease-in-out',
+            top: '72px'
+          }}
           muted
           playsInline
           autoPlay
@@ -181,27 +242,42 @@ export function HeroSection() {
       )}
 
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 -z-10 bg-background/20" />
+      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] bg-background/15" style={{ zIndex: 1, top: '72px' }} />
 
       {/* Abstract gradient background overlay */}
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0" style={{ zIndex: 2 }}>
         <div className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] rounded-full bg-accent/10 blur-3xl" />
         <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] rounded-full bg-accent-light/20 blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-accent/5 blur-3xl" />
       </div>
 
-      <div className="max-w-[1100px] mx-auto px-6 text-center">
-        <h1 className="animate-on-scroll opacity-0 text-5xl md:text-6xl lg:text-[48px] font-semibold text-primary mb-6 text-balance">
+      <div className="max-w-[1100px] mx-auto px-6 text-center" style={{ position: 'relative', zIndex: 10 }}>
+        <h1 
+          className="animate-on-scroll opacity-0 text-5xl md:text-6xl lg:text-[48px] font-semibold text-primary mb-6 text-balance"
+          style={{
+            textShadow: '-4px -4px 0 white, 4px -4px 0 white, -4px 4px 0 white, 4px 4px 0 white, -4px 0 0 white, 4px 0 0 white, 0 -4px 0 white, 0 4px 0 white, -3px -3px 0 white, 3px -3px 0 white, -3px 3px 0 white, 3px 3px 0 white, -3px 0 0 white, 3px 0 0 white, 0 -3px 0 white, 0 3px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 2px 2px 0 white, -2px 0 0 white, 2px 0 0 white, 0 -2px 0 white, 0 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, -1px 0 0 white, 1px 0 0 white, 0 -1px 0 white, 0 1px 0 white'
+          }}
+        >
           Welcome to Empty Console
         </h1>
 
-        <p className="animate-on-scroll opacity-0 animate-delay-100 text-lg md:text-xl text-secondary max-w-3xl mx-auto mb-8 leading-relaxed text-pretty">
+        <p 
+          className="animate-on-scroll opacity-0 animate-delay-100 text-lg md:text-xl text-secondary max-w-3xl mx-auto mb-8 leading-relaxed text-pretty"
+          style={{
+            textShadow: '-2.5px -2.5px 0 white, 2.5px -2.5px 0 white, -2.5px 2.5px 0 white, 2.5px 2.5px 0 white, -2.5px 0 0 white, 2.5px 0 0 white, 0 -2.5px 0 white, 0 2.5px 0 white, -1.5px -1.5px 0 white, 1.5px -1.5px 0 white, -1.5px 1.5px 0 white, 1.5px 1.5px 0 white, -1.5px 0 0 white, 1.5px 0 0 white, 0 -1.5px 0 white, 0 1.5px 0 white, -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white, -0.5px 0 0 white, 0.5px 0 0 white, 0 -0.5px 0 white, 0 0.5px 0 white'
+          }}
+        >
           Empty Console is a team of students who came together due to their love of programming. From a shared passion,
           the team has evolved into a collaborative space where each member can pursue their unique talents, contribute
           meaningfully to projects, and develop skills while learning from each other.
         </p>
 
-        <p className="animate-on-scroll opacity-0 animate-delay-200 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed text-pretty">
+        <p 
+          className="animate-on-scroll opacity-0 animate-delay-200 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed text-pretty"
+          style={{
+            textShadow: '-1.5px -1.5px 0 white, 1.5px -1.5px 0 white, -1.5px 1.5px 0 white, 1.5px 1.5px 0 white, -1.5px 0 0 white, 1.5px 0 0 white, 0 -1.5px 0 white, 0 1.5px 0 white, -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white, -0.5px 0 0 white, 0.5px 0 0 white, 0 -0.5px 0 white, 0 0.5px 0 white'
+          }}
+        >
           Each member brings a unique perspective, balancing technical expertise, creativity, and teamwork to produce
           innovative projects.
         </p>
