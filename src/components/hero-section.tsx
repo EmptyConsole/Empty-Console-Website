@@ -253,18 +253,20 @@ export function HeroSection() {
 
       <div className="max-w-[1100px] mx-auto px-6 text-center" style={{ position: 'relative', zIndex: 10 }}>
         <h1 
-          className="animate-on-scroll opacity-0 text-5xl md:text-6xl lg:text-[48px] font-semibold text-primary mb-6 text-balance"
+          className="animate-on-scroll text-5xl md:text-6xl lg:text-[48px] font-semibold mb-6 text-balance"
           style={{
-            textShadow: '-4px -4px 0 white, 4px -4px 0 white, -4px 4px 0 white, 4px 4px 0 white, -4px 0 0 white, 4px 0 0 white, 0 -4px 0 white, 0 4px 0 white, -3px -3px 0 white, 3px -3px 0 white, -3px 3px 0 white, 3px 3px 0 white, -3px 0 0 white, 3px 0 0 white, 0 -3px 0 white, 0 3px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 2px 2px 0 white, -2px 0 0 white, 2px 0 0 white, 0 -2px 0 white, 0 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, -1px 0 0 white, 1px 0 0 white, 0 -1px 0 white, 0 1px 0 white'
+            color: '#facc15',
+            textShadow: '-4px -4px 0 black, 4px -4px 0 black, -4px 4px 0 black, 4px 4px 0 black, -4px 0 0 black, 4px 0 0 black, 0 -4px 0 black, 0 4px 0 black, -3px -3px 0 black, 3px -3px 0 black, -3px 3px 0 black, 3px 3px 0 black, -3px 0 0 black, 3px 0 0 black, 0 -3px 0 black, 0 3px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black, 2px 2px 0 black, -2px 0 0 black, 2px 0 0 black, 0 -2px 0 black, 0 2px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black, -1px 0 0 black, 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black'
           }}
         >
           Welcome to Empty Console
         </h1>
 
         <p 
-          className="animate-on-scroll opacity-0 animate-delay-100 text-lg md:text-xl text-secondary max-w-3xl mx-auto mb-8 leading-relaxed text-pretty"
+          className="animate-on-scroll animate-delay-100 text-lg md:text-xl max-w-3xl mx-auto mb-8 leading-relaxed text-pretty"
           style={{
-            textShadow: '-2.5px -2.5px 0 white, 2.5px -2.5px 0 white, -2.5px 2.5px 0 white, 2.5px 2.5px 0 white, -2.5px 0 0 white, 2.5px 0 0 white, 0 -2.5px 0 white, 0 2.5px 0 white, -1.5px -1.5px 0 white, 1.5px -1.5px 0 white, -1.5px 1.5px 0 white, 1.5px 1.5px 0 white, -1.5px 0 0 white, 1.5px 0 0 white, 0 -1.5px 0 white, 0 1.5px 0 white, -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white, -0.5px 0 0 white, 0.5px 0 0 white, 0 -0.5px 0 white, 0 0.5px 0 white'
+            color: '#facc15',
+            textShadow: '-2.5px -2.5px 0 black, 2.5px -2.5px 0 black, -2.5px 2.5px 0 black, 2.5px 2.5px 0 black, -2.5px 0 0 black, 2.5px 0 0 black, 0 -2.5px 0 black, 0 2.5px 0 black, -1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black'
           }}
         >
           Empty Console is a team of students who came together due to their love of programming. From a shared passion,
@@ -273,22 +275,25 @@ export function HeroSection() {
         </p>
 
         <p 
-          className="animate-on-scroll opacity-0 animate-delay-200 text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed text-pretty"
+          className="animate-on-scroll animate-delay-200 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed text-pretty"
           style={{
-            textShadow: '-1.5px -1.5px 0 white, 1.5px -1.5px 0 white, -1.5px 1.5px 0 white, 1.5px 1.5px 0 white, -1.5px 0 0 white, 1.5px 0 0 white, 0 -1.5px 0 white, 0 1.5px 0 white, -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white, -0.5px 0 0 white, 0.5px 0 0 white, 0 -0.5px 0 white, 0 0.5px 0 white'
+            color: '#facc15',
+            textShadow: '-1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black'
           }}
         >
           Each member brings a unique perspective, balancing technical expertise, creativity, and teamwork to produce
           innovative projects.
         </p>
 
-        <div className="animate-on-scroll opacity-0 animate-delay-300">
+        <div className="animate-on-scroll animate-delay-300">
           <Button
             onClick={handleScrollToTeam}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground font-medium uppercase tracking-wide px-8 py-6 text-sm rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+            className="bg-accent hover:bg-accent/95 active:bg-accent/92 text-accent-foreground font-medium uppercase tracking-wide px-10 py-7 text-base rounded-2xl shadow-lg hover:shadow-2xl active:shadow-md transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 transform"
           >
-            Meet the Team
-            <ArrowDown className="ml-2 h-4 w-4" />
+            Meet the Team <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v18" />
+              <path d="M6 14l6 6 6-6" />
+            </svg>
           </Button>
         </div>
       </div>
