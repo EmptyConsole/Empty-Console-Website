@@ -1,14 +1,15 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import Image from "next/image"
 import { TeamMemberCard } from "@/components/team-member-card"
 
 const teamMembers = [
   {
     name: "HF_ang",
     role: "Co-Founder",
-    // image: "/HF_ang PFP.png",
-    image: "/BetterEmptyConsoleLogo.png",
+    image: "/HF_ang PFP.png",
+    // image: "/BetterEmptyConsoleLogo.png",
     bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. As the main programmer and artist, he brings both technical expertise and creative vision to every project.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
@@ -74,6 +75,18 @@ export function TeamSection() {
           <p className="animate-on-scroll opacity-0 animate-delay-100 text-lg text-muted-foreground max-w-2xl mx-auto">
             Meet the talented individuals behind our innovative projects
           </p>
+        </div>
+
+        {/* Hidden logo image before HF_ang's picture */}
+        <div className="opacity-0 w-0 h-0 overflow-hidden pointer-events-none fixed -z-10">
+          <Image
+            src="/BetterEmptyConsoleLogo.png"
+            alt=""
+            width={1}
+            height={1}
+            loading="eager"
+            unoptimized
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
