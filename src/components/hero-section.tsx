@@ -219,34 +219,14 @@ export function HeroSection() {
         .hero-text {
           color: black;
         }
-        @media (min-width: 768px) {
-          .hero-text {
-            color: #facc15;
-          }
-        }
         .hero-text-h1 {
-          text-shadow: none;
-        }
-        @media (min-width: 768px) {
-          .hero-text-h1 {
-            text-shadow: -4px -4px 0 black, 4px -4px 0 black, -4px 4px 0 black, 4px 4px 0 black, -4px 0 0 black, 4px 0 0 black, 0 -4px 0 black, 0 4px 0 black, -3px -3px 0 black, 3px -3px 0 black, -3px 3px 0 black, 3px 3px 0 black, -3px 0 0 black, 3px 0 0 black, 0 -3px 0 black, 0 3px 0 black, -2px -2px 0 black, 2px -2px 0 black, -2px 2px 0 black, 2px 2px 0 black, -2px 0 0 black, 2px 0 0 black, 0 -2px 0 black, 0 2px 0 black, -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black, -1px 0 0 black, 1px 0 0 black, 0 -1px 0 black, 0 1px 0 black;
-          }
+          text-shadow: -4px -4px 0 white, 4px -4px 0 white, -4px 4px 0 white, 4px 4px 0 white, -4px 0 0 white, 4px 0 0 white, 0 -4px 0 white, 0 4px 0 white, -3px -3px 0 white, 3px -3px 0 white, -3px 3px 0 white, 3px 3px 0 white, -3px 0 0 white, 3px 0 0 white, 0 -3px 0 white, 0 3px 0 white, -2px -2px 0 white, 2px -2px 0 white, -2px 2px 0 white, 2px 2px 0 white, -2px 0 0 white, 2px 0 0 white, 0 -2px 0 white, 0 2px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white, -1px 0 0 white, 1px 0 0 white, 0 -1px 0 white, 0 1px 0 white;
         }
         .hero-text-p {
-          text-shadow: none;
-        }
-        @media (min-width: 768px) {
-          .hero-text-p {
-            text-shadow: -2.5px -2.5px 0 black, 2.5px -2.5px 0 black, -2.5px 2.5px 0 black, 2.5px 2.5px 0 black, -2.5px 0 0 black, 2.5px 0 0 black, 0 -2.5px 0 black, 0 2.5px 0 black, -1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black;
-          }
+          text-shadow: -2.5px -2.5px 0 white, 2.5px -2.5px 0 white, -2.5px 2.5px 0 white, 2.5px 2.5px 0 white, -2.5px 0 0 white, 2.5px 0 0 white, 0 -2.5px 0 white, 0 2.5px 0 white, -1.5px -1.5px 0 white, 1.5px -1.5px 0 white, -1.5px 1.5px 0 white, 1.5px 1.5px 0 white, -1.5px 0 0 white, 1.5px 0 0 white, 0 -1.5px 0 white, 0 1.5px 0 white, -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white, -0.5px 0 0 white, 0.5px 0 0 white, 0 -0.5px 0 white, 0 0.5px 0 white;
         }
         .hero-text-p2 {
-          text-shadow: none;
-        }
-        @media (min-width: 768px) {
-          .hero-text-p2 {
-            text-shadow: -1.5px -1.5px 0 black, 1.5px -1.5px 0 black, -1.5px 1.5px 0 black, 1.5px 1.5px 0 black, -1.5px 0 0 black, 1.5px 0 0 black, 0 -1.5px 0 black, 0 1.5px 0 black, -0.5px -0.5px 0 black, 0.5px -0.5px 0 black, -0.5px 0.5px 0 black, 0.5px 0.5px 0 black, -0.5px 0 0 black, 0.5px 0 0 black, 0 -0.5px 0 black, 0 0.5px 0 black;
-          }
+          text-shadow: -1.5px -1.5px 0 white, 1.5px -1.5px 0 white, -1.5px 1.5px 0 white, 1.5px 1.5px 0 white, -1.5px 0 0 white, 1.5px 0 0 white, 0 -1.5px 0 white, 0 1.5px 0 white, -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white, -0.5px 0 0 white, 0.5px 0 0 white, 0 -0.5px 0 white, 0 0.5px 0 white;
         }
       `}} />
       <section
@@ -277,7 +257,7 @@ export function HeroSection() {
       )}
 
       {/* Dark overlay for better text readability */}
-      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] bg-background/21" style={{ zIndex: 1, top: '72px' }} />
+      <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] bg-background/40" style={{ zIndex: 1, top: '72px' }} />
 
       {/* Abstract gradient background overlay */}
       <div className="absolute inset-0" style={{ zIndex: 2 }}>
