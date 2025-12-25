@@ -278,15 +278,17 @@ export function HeroSection() {
         >
           Empty Console is a team of students who came together due to their love of programming. From a shared passion,
           the team has evolved into a collaborative space where each member can pursue their unique talents, contribute
-          meaningfully to projects, and develop skills while learning from each other.
+          meaningfully to projects, and develop skills while learning from each other. Everyone on the team brings a 
+          unique perspective, balancing technical expertise, creativity, and teamwork to produce innovative projects and 
+          products, all while learning more about video coding and of the world's future.
         </p>
 
-        <p 
+        {/* <p 
           className="animate-on-scroll animate-delay-200 text-base md:text-lg max-w-2xl mx-auto mb-10 leading-relaxed text-pretty hero-text hero-text-p2"
         >
           Each member brings a unique perspective, balancing technical expertise, creativity, and teamwork to produce
           innovative projects.
-        </p>
+        </p> */}
 
         <div className="animate-on-scroll animate-delay-300">
           <Button

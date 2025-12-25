@@ -11,7 +11,7 @@ const teamMembers = [
     // Hidden logo image before HF_ang's picture
     image: "/HF_ang PFP.png",
     // image: "/BetterEmptyConsoleLogo.png",
-    bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. As the main programmer and artist, he brings both technical expertise and creative vision to every project.",
+    bio: "HF_ang discovered coding through video games and has since developed a passion for problem-solving, creating digital art, and experimenting with physics in code. Adding his video game skills of code and art, he brings easy to read UI and user engagement to the team’s creations. He also constantly experiments with new concepts in his work.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
       { icon: "🏓", label: "Ping-pong" },
@@ -23,7 +23,7 @@ const teamMembers = [
     name: "ShyGuy",
     role: "Co-Founder",
     image: "/images (1).jpeg",
-    bio: "ShyGuy handles marketing, presentations, communications, and programming. He discovered technology at a young age and has developed strong skills in leadership and strategy. His ability to coordinate and communicate effectively makes him essential to the team's success.",
+    bio: "ShyGuy oversees marketing, communications, product positioning, while also contributing to development. He discovered technology at a young age and has developed strong skills in leadership and strategy. He plays a central role in shaping product vision, aligning the team, and communicating complex ideas clearly.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
       { icon: "⛳", label: "Golf" },
@@ -36,7 +36,7 @@ const teamMembers = [
     name: "Emey",
     role: "Co-Founder",
     image: "/pixilart-1766028338678.png",
-    bio: "Emey is the music composer and and an artist on the team. He began coding later than the other members but learned extremely quickly. He enjoys exploring the intersection of music, art, and programming, bringing a unique audio-visual perspective to the team's projects.",
+    bio: "Emey is the music composer and an artist on the team. He began coding later than the other members but learned extremely quickly. He enjoys exploring the intersection of music, art, and programming, bringing a unique audio-visual perspective to the team's projects. Through his view of everything, he consistently enhances user experience.",
     hobbies: [
       { icon: "🎾", label: "Tennis" },
       { icon: "🎹", label: "Piano" },
