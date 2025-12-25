@@ -20,6 +20,11 @@ export function HeroSection() {
   const [videoList, setVideoList] = useState<string[]>([])
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
   const [isVideoReady, setIsVideoReady] = useState(false)
+  const [videoOpacity, setVideoOpacity] = useState(0)
+
+  const SKIP_START = 1.5
+  const SKIP_END = 1.5
+  const FADE_DURATION = 0.75
 
   // Fetch video list from API (automatically detects all videos in /public/Clips)
   useEffect(() => {
@@ -63,10 +68,44 @@ export function HeroSection() {
   useEffect(() => {
     const video = videoRef.current
     if (!video || videoList.length === 0) return
-
-    const SKIP_START = 1.5
-    const SKIP_END = 1.5
+    setIsVideoReady(false)
+    setVideoOpacity(0)
     let isTransitioning = false
+
+    // Apply opacity fade for the first/last 0.75s of playable segment (after skips)
+    const updateVideoOpacity = () => {
+      if (!video.duration) {
+        setVideoOpacity(0)
+        return
+      }
+
+      const playableStart = SKIP_START
+      const playableEnd = video.duration - SKIP_END
+
+      // If the video is too short after skips, keep it fully visible
+      if (playableEnd - playableStart <= FADE_DURATION * 2) {
+        setVideoOpacity(1)
+        return
+      }
+
+      const fadeInEnd = playableStart + FADE_DURATION
+      const fadeOutStart = playableEnd - FADE_DURATION
+      const current = video.currentTime
+
+      let nextOpacity = 1
+
+      if (current < playableStart) {
+        nextOpacity = 0
+      } else if (current <= fadeInEnd) {
+        nextOpacity = Math.min(1, Math.max(0, (current - playableStart) / FADE_DURATION))
+      } else if (current >= fadeOutStart) {
+        nextOpacity = Math.min(1, Math.max(0, (playableEnd - current) / FADE_DURATION))
+      } else {
+        nextOpacity = 1
+      }
+
+      setVideoOpacity((prev) => (Math.abs(prev - nextOpacity) > 0.01 ? nextOpacity : prev))
+    }
 
     // Ensure video starts at SKIP_START and doesn't go beyond duration - SKIP_END
     const enforceTimeBounds = () => {
@@ -96,12 +135,14 @@ export function HeroSection() {
         video.currentTime = SKIP_START
       }
       setIsVideoReady(true)
+      updateVideoOpacity()
       console.log("Video metadata loaded, duration:", video.duration)
     }
 
     const handleSeeked = () => {
       // Ensure we're still within bounds after seeking
       enforceTimeBounds()
+      updateVideoOpacity()
     }
 
     const handleCanPlay = async () => {
@@ -112,6 +153,7 @@ export function HeroSection() {
           video.currentTime = SKIP_START
         }
       }
+      updateVideoOpacity()
       console.log("Video can play")
       try {
         await video.play()
@@ -131,6 +173,7 @@ export function HeroSection() {
           video.currentTime = SKIP_START
         }
       }
+      updateVideoOpacity()
       if (video.paused) {
         video.play().catch(e => console.error("Play on loaded data failed:", e))
       }
@@ -139,6 +182,7 @@ export function HeroSection() {
     const handleTimeUpdate = () => {
       if (isTransitioning) return
       enforceTimeBounds()
+      updateVideoOpacity()
     }
 
     const handleEnded = () => {
@@ -163,6 +207,7 @@ export function HeroSection() {
     video.addEventListener("error", handleError)
 
     video.load()
+    updateVideoOpacity()
     
     const playTimeout = setTimeout(() => {
       if (video.paused && video.readyState >= 2) {
@@ -242,8 +287,8 @@ export function HeroSection() {
           className="hidden md:block absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] object-contain"
           style={{ 
             zIndex: 0,
-            opacity: isVideoReady ? 1 : 0,
-            transition: 'opacity 0.3s ease-in-out',
+            opacity: isVideoReady ? videoOpacity : 0,
+            transition: 'opacity 0.2s linear',
             top: '72px'
           }}
           muted

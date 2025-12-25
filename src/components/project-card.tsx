@@ -22,6 +22,8 @@ export function ProjectCard({ title, description, learnings, technologies, image
   const videoRef = useRef<HTMLVideoElement>(null)
   const SKIP_START = 1.5 // seconds to skip at start
   const SKIP_END = 1.5 // seconds to skip at end
+  const FADE_DURATION = 0.75 // seconds to fade in/out of the playable range
+  const [videoOpacity, setVideoOpacity] = useState(0)
 
   // Detect if device is desktop (not touch device and has hover capability)
   useEffect(() => {
@@ -40,6 +42,41 @@ export function ProjectCard({ title, description, learnings, technologies, image
   useEffect(() => {
     const videoElement = videoRef.current
     if (!videoElement || !video || !isHovered || !isDesktop) return
+    setVideoOpacity(0)
+
+    const updateVideoOpacity = () => {
+      if (!videoElement.duration) {
+        setVideoOpacity(0)
+        return
+      }
+
+      const playableStart = SKIP_START
+      const playableEnd = videoElement.duration - SKIP_END
+
+      // If playable segment is too short, keep visible
+      if (playableEnd - playableStart <= FADE_DURATION * 2) {
+        setVideoOpacity(1)
+        return
+      }
+
+      const fadeInEnd = playableStart + FADE_DURATION
+      const fadeOutStart = playableEnd - FADE_DURATION
+      const current = videoElement.currentTime
+
+      let nextOpacity = 1
+
+      if (current < playableStart) {
+        nextOpacity = 0
+      } else if (current <= fadeInEnd) {
+        nextOpacity = Math.min(1, Math.max(0, (current - playableStart) / FADE_DURATION))
+      } else if (current >= fadeOutStart) {
+        nextOpacity = Math.min(1, Math.max(0, (playableEnd - current) / FADE_DURATION))
+      } else {
+        nextOpacity = 1
+      }
+
+      setVideoOpacity((prev) => (Math.abs(prev - nextOpacity) > 0.01 ? nextOpacity : prev))
+    }
 
     const handleTimeUpdate = () => {
       if (videoElement.duration) {
@@ -48,21 +85,32 @@ export function ProjectCard({ title, description, learnings, technologies, image
           videoElement.currentTime = SKIP_START
         }
       }
+      updateVideoOpacity()
     }
 
     const handleLoadedMetadata = () => {
       videoElement.currentTime = SKIP_START
+      updateVideoOpacity()
       videoElement.play().catch(() => {
         // Ignore autoplay errors
       })
     }
 
+    const handleCanPlay = () => {
+      if (videoElement.currentTime < SKIP_START && videoElement.duration > SKIP_START + SKIP_END) {
+        videoElement.currentTime = SKIP_START
+      }
+      updateVideoOpacity()
+    }
+
     videoElement.addEventListener("timeupdate", handleTimeUpdate)
     videoElement.addEventListener("loadedmetadata", handleLoadedMetadata)
+    videoElement.addEventListener("canplay", handleCanPlay)
 
     // Set initial time when video loads
     if (videoElement.readyState >= 1) {
       videoElement.currentTime = SKIP_START
+      updateVideoOpacity()
       videoElement.play().catch(() => {
         // Ignore autoplay errors
       })
@@ -71,6 +119,7 @@ export function ProjectCard({ title, description, learnings, technologies, image
     return () => {
       videoElement.removeEventListener("timeupdate", handleTimeUpdate)
       videoElement.removeEventListener("loadedmetadata", handleLoadedMetadata)
+      videoElement.removeEventListener("canplay", handleCanPlay)
     }
   }, [isHovered, video, isDesktop])
 
@@ -87,6 +136,7 @@ export function ProjectCard({ title, description, learnings, technologies, image
         videoRef.current.pause()
         videoRef.current.currentTime = 0
       }
+      setVideoOpacity(0)
     }
   }
 
@@ -102,6 +152,10 @@ export function ProjectCard({ title, description, learnings, technologies, image
             ref={videoRef}
             src={video}
             className="absolute inset-0 w-full h-full object-contain"
+            style={{
+              opacity: videoOpacity,
+              transition: 'opacity 0.2s linear',
+            }}
             muted
             playsInline
             loop={false}
