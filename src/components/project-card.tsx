@@ -22,7 +22,7 @@ export function ProjectCard({ title, description, learnings, technologies, image
   const videoRef = useRef<HTMLVideoElement>(null)
   const SKIP_START = 1.5 // seconds to skip at start
   const SKIP_END = 1.5 // seconds to skip at end
-  const FADE_DURATION = 0.75 // seconds to fade in/out of the playable range
+  const CROSSFADE_DURATION = 0.6 // seconds for fade transition (matches hero section)
   const [videoOpacity, setVideoOpacity] = useState(0)
 
   // Detect if device is desktop (not touch device and has hover capability)
@@ -54,13 +54,13 @@ export function ProjectCard({ title, description, learnings, technologies, image
       const playableEnd = videoElement.duration - SKIP_END
 
       // If playable segment is too short, keep visible
-      if (playableEnd - playableStart <= FADE_DURATION * 2) {
+      if (playableEnd - playableStart <= CROSSFADE_DURATION * 2) {
         setVideoOpacity(1)
         return
       }
 
-      const fadeInEnd = playableStart + FADE_DURATION
-      const fadeOutStart = playableEnd - FADE_DURATION
+      const fadeInEnd = playableStart + CROSSFADE_DURATION
+      const fadeOutStart = playableEnd - CROSSFADE_DURATION
       const current = videoElement.currentTime
 
       let nextOpacity = 1
@@ -68,9 +68,9 @@ export function ProjectCard({ title, description, learnings, technologies, image
       if (current < playableStart) {
         nextOpacity = 0
       } else if (current <= fadeInEnd) {
-        nextOpacity = Math.min(1, Math.max(0, (current - playableStart) / FADE_DURATION))
+        nextOpacity = Math.min(1, Math.max(0, (current - playableStart) / CROSSFADE_DURATION))
       } else if (current >= fadeOutStart) {
-        nextOpacity = Math.min(1, Math.max(0, (playableEnd - current) / FADE_DURATION))
+        nextOpacity = Math.min(1, Math.max(0, (playableEnd - current) / CROSSFADE_DURATION))
       } else {
         nextOpacity = 1
       }
@@ -154,7 +154,7 @@ export function ProjectCard({ title, description, learnings, technologies, image
             className="absolute inset-0 w-full h-full object-contain"
             style={{
               opacity: videoOpacity,
-              transition: 'opacity 0.2s linear',
+              transition: `opacity ${CROSSFADE_DURATION}s linear`,
             }}
             muted
             playsInline
