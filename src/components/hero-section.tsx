@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { ElementType, useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowDown } from "lucide-react"
 
@@ -12,6 +12,77 @@ function shuffleArray<T>(array: T[]): T[] {
     ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled
+}
+
+type TypewriterElement = ElementType
+
+const HERO_TITLE = "Welcome to Empty Console"
+const HERO_PARAGRAPH =
+  "Empty Console is a team of students who came together due to their love of programming. From a shared passion, the team has evolved into a collaborative space where each member can pursue their unique talents, contribute meaningfully to projects, and develop skills while learning from each other. Everyone on the team brings a unique perspective, balancing technical expertise, creativity, and teamwork to produce innovative projects and products, all while learning more about video coding and of the world's future."
+const HERO_BUTTON_TEXT = "Meet the Team"
+
+const HERO_TITLE_SPEED = 55
+const HERO_TITLE_DELAY = 250
+
+function useTypewriter(text: string, speed = 16, startDelay = 0) {
+  const [displayed, setDisplayed] = useState("")
+
+  useEffect(() => {
+    const effectiveSpeed = Math.max(speed, 4)
+    const effectiveDelay = Math.max(startDelay, 0)
+    setDisplayed("")
+
+    let intervalId: ReturnType<typeof setInterval> | undefined
+    const delayId = setTimeout(() => {
+      let index = 0
+      intervalId = setInterval(() => {
+        index += 1
+        setDisplayed(text.slice(0, index))
+        if (index >= text.length) {
+          if (intervalId) clearInterval(intervalId)
+        }
+      }, effectiveSpeed)
+    }, effectiveDelay)
+
+    return () => {
+      if (intervalId) clearInterval(intervalId)
+      clearTimeout(delayId)
+    }
+  }, [text, speed, startDelay])
+
+  return displayed
+}
+
+function Typewriter({
+  text,
+  speed,
+  startDelay,
+  className,
+  as,
+  showCursor = true,
+}: {
+  text: string
+  speed?: number
+  startDelay?: number
+  className?: string
+  as?: TypewriterElement
+  showCursor?: boolean
+}) {
+  const Component: TypewriterElement = as ?? "span"
+  const typedText = useTypewriter(text, speed, startDelay)
+  const isComplete = typedText.length === text.length
+
+  return (
+    <Component className={className} aria-label={text}>
+      {typedText}
+      {showCursor && (
+        <span
+          className={`typewriter-caret${isComplete ? " typewriter-caret-done" : ""}`}
+          aria-hidden
+        />
+      )}
+    </Component>
+  )
 }
 
 export function HeroSection() {
@@ -231,6 +302,20 @@ export function HeroSection() {
         .hero-text-p2 {
           text-shadow: -1.5px -1.5px 0 white, 1.5px -1.5px 0 white, -1.5px 1.5px 0 white, 1.5px 1.5px 0 white, -1.5px 0 0 white, 1.5px 0 0 white, 0 -1.5px 0 white, 0 1.5px 0 white, -0.5px -0.5px 0 white, 0.5px -0.5px 0 white, -0.5px 0.5px 0 white, 0.5px 0.5px 0 white, -0.5px 0 0 white, 0.5px 0 0 white, 0 -0.5px 0 white, 0 0.5px 0 white;
         }
+        .typewriter-caret {
+          display: inline-block;
+          width: 0.18em;
+          margin-left: 0.08em;
+          border-left: 2px solid currentColor;
+          animation: typewriter-caret-blink 1s steps(1) infinite;
+        }
+        .typewriter-caret-done {
+          opacity: 0;
+          animation: none;
+        }
+        @keyframes typewriter-caret-blink {
+          50% { opacity: 0; }
+        }
       `}} />
       <section
         id="home"
@@ -284,20 +369,16 @@ export function HeroSection() {
       </div>
 
       <div className="max-w-[1100px] mx-auto px-6 text-center" style={{ position: 'relative', zIndex: 10 }}>
-        <h1 
+        <Typewriter
+          as="h1"
           className="animate-on-scroll text-5xl md:text-6xl lg:text-[48px] font-semibold mb-6 text-balance hero-text hero-text-h1"
-        >
-          Welcome to Empty Console
-        </h1>
+          text={HERO_TITLE}
+          speed={HERO_TITLE_SPEED}
+          startDelay={HERO_TITLE_DELAY}
+        />
 
-        <p 
-          className="animate-on-scroll animate-delay-100 text-lg md:text-xl max-w-3xl mx-auto mb-8 leading-relaxed text-pretty hero-text hero-text-p"
-        >
-          Empty Console is a team of students who came together due to their love of programming. From a shared passion,
-          the team has evolved into a collaborative space where each member can pursue their unique talents, contribute
-          meaningfully to projects, and develop skills while learning from each other. Everyone on the team brings a 
-          unique perspective, balancing technical expertise, creativity, and teamwork to produce innovative projects and 
-          products, all while learning more about video coding and of the world's future.
+        <p className="animate-on-scroll animate-delay-100 text-lg md:text-xl max-w-3xl mx-auto mb-8 leading-relaxed text-pretty hero-text hero-text-p">
+          {HERO_PARAGRAPH}
         </p>
 
         {/* <p 
@@ -312,7 +393,8 @@ export function HeroSection() {
             onClick={handleScrollToTeam}
             className="bg-accent hover:bg-accent/95 active:bg-accent/92 text-accent-foreground font-medium uppercase tracking-wide px-10 py-7 text-base rounded-2xl shadow-lg hover:shadow-2xl active:shadow-md transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 transform"
           >
-            Meet the Team <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <span className="mr-3 inline-block">{HERO_BUTTON_TEXT}</span>
+            <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 2v18" />
               <path d="M6 14l6 6 6-6" />
             </svg>
