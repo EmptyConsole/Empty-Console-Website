@@ -22,7 +22,8 @@ export function ProjectCard({ title, description, learnings, technologies, image
   const videoRef = useRef<HTMLVideoElement>(null)
   const SKIP_START = 1.5 // seconds to skip at start
   const SKIP_END = 1.5 // seconds to skip at end
-  const CROSSFADE_DURATION = 0.6 // seconds for fade transition (matches hero section)
+  const FADE_IN_DURATION = 0.25 // seconds for initial fade in (faster)
+  const CROSSFADE_DURATION = 0.6 // seconds for fade out transition (matches hero section)
   const [videoOpacity, setVideoOpacity] = useState(0)
 
   // Detect if device is desktop (not touch device and has hover capability)
@@ -54,12 +55,12 @@ export function ProjectCard({ title, description, learnings, technologies, image
       const playableEnd = videoElement.duration - SKIP_END
 
       // If playable segment is too short, keep visible
-      if (playableEnd - playableStart <= CROSSFADE_DURATION * 2) {
+      if (playableEnd - playableStart <= FADE_IN_DURATION + CROSSFADE_DURATION) {
         setVideoOpacity(1)
         return
       }
 
-      const fadeInEnd = playableStart + CROSSFADE_DURATION
+      const fadeInEnd = playableStart + FADE_IN_DURATION
       const fadeOutStart = playableEnd - CROSSFADE_DURATION
       const current = videoElement.currentTime
 
@@ -68,7 +69,7 @@ export function ProjectCard({ title, description, learnings, technologies, image
       if (current < playableStart) {
         nextOpacity = 0
       } else if (current <= fadeInEnd) {
-        nextOpacity = Math.min(1, Math.max(0, (current - playableStart) / CROSSFADE_DURATION))
+        nextOpacity = Math.min(1, Math.max(0, (current - playableStart) / FADE_IN_DURATION))
       } else if (current >= fadeOutStart) {
         nextOpacity = Math.min(1, Math.max(0, (playableEnd - current) / CROSSFADE_DURATION))
       } else {
@@ -154,7 +155,7 @@ export function ProjectCard({ title, description, learnings, technologies, image
             className="absolute inset-0 w-full h-full object-contain"
             style={{
               opacity: videoOpacity,
-              transition: `opacity ${CROSSFADE_DURATION}s linear`,
+              transition: `opacity ${FADE_IN_DURATION}s linear`,
             }}
             muted
             playsInline
