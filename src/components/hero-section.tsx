@@ -16,15 +16,18 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
+  const isCrossfadingRef = useRef(false)
   const [videoList, setVideoList] = useState<string[]>([])
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0)
-  const [isVideoReady, setIsVideoReady] = useState(false)
-  const [videoOpacity, setVideoOpacity] = useState(0)
+  const [activeLayer, setActiveLayer] = useState<0 | 1>(0)
+  const [layerSources, setLayerSources] = useState<(string | null)[]>([null, null])
+  const [layerOpacity, setLayerOpacity] = useState<[number, number]>([0, 0])
+  const [pendingVideoIndex, setPendingVideoIndex] = useState<number | null>(null)
 
   const SKIP_START = 1.5
   const SKIP_END = 1.5
-  const FADE_DURATION = 0.75
+  const CROSSFADE_DURATION = 0.6
 
   // Fetch video list from API (automatically detects all videos in /public/Clips)
   useEffect(() => {
@@ -64,174 +67,129 @@ export function HeroSection() {
     fetchVideos()
   }, [])
 
-  // Handle video playback with skip logic
+  const setOpacityForLayer = (layer: 0 | 1, value: number) => {
+    setLayerOpacity((prev) => {
+      const next = [...prev] as [number, number]
+      next[layer] = value
+      return next
+    })
+  }
+
+  const ensureWithinPlayableRange = (video: HTMLVideoElement | null) => {
+    if (!video || !video.duration) return
+    if (video.duration <= SKIP_START + SKIP_END) return
+    if (video.currentTime < SKIP_START) {
+      video.currentTime = SKIP_START
+    }
+  }
+
+  const queueNextVideo = () => {
+    if (videoList.length <= 1) return
+    if (pendingVideoIndex !== null) return
+    const targetLayer: 0 | 1 = activeLayer === 0 ? 1 : 0
+    const nextIndex = (currentVideoIndex + 1) % videoList.length
+    setPendingVideoIndex(nextIndex)
+    setLayerSources((prev) => {
+      const next = [...prev]
+      next[targetLayer] = videoList[nextIndex]
+      return next
+    })
+    setOpacityForLayer(targetLayer, 0)
+  }
+
+  const startCrossfade = (nextLayer: 0 | 1, targetIndex: number) => {
+    if (isCrossfadingRef.current) return
+    isCrossfadingRef.current = true
+
+    const currentLayer = activeLayer
+    const incomingVideo = videoRefs.current[nextLayer]
+    const outgoingVideo = videoRefs.current[currentLayer]
+
+    if (incomingVideo) {
+      ensureWithinPlayableRange(incomingVideo)
+      incomingVideo.play().catch((e) => console.error("Error playing next video:", e))
+    }
+
+    setLayerOpacity((prev) => {
+      const next = [...prev] as [number, number]
+      next[nextLayer] = 1
+      next[currentLayer] = 0
+      return next
+    })
+
+    setTimeout(() => {
+      if (outgoingVideo && !outgoingVideo.paused) {
+        outgoingVideo.pause()
+      }
+      setActiveLayer(nextLayer)
+      setCurrentVideoIndex(targetIndex)
+      setPendingVideoIndex(null)
+      isCrossfadingRef.current = false
+    }, CROSSFADE_DURATION * 1000)
+  }
+
+  const handleLoadedMetadata = (layer: 0 | 1) => {
+    const video = videoRefs.current[layer]
+    if (!video) return
+    if (video.duration && video.duration > SKIP_START + SKIP_END) {
+      video.currentTime = SKIP_START
+    }
+  }
+
+  const handleCanPlay = (layer: 0 | 1) => {
+    const video = videoRefs.current[layer]
+    if (!video) return
+    ensureWithinPlayableRange(video)
+    video.play().catch((e) => console.error("Error playing video:", e))
+
+    if (pendingVideoIndex !== null && layerSources[layer] === videoList[pendingVideoIndex]) {
+      startCrossfade(layer, pendingVideoIndex)
+    } else if (layer === activeLayer && layerOpacity[layer] === 0) {
+      setOpacityForLayer(layer, 1)
+    }
+  }
+
+  const handleTimeUpdate = (layer: 0 | 1) => {
+    if (layer !== activeLayer) return
+    const video = videoRefs.current[layer]
+    if (!video || !video.duration) return
+    ensureWithinPlayableRange(video)
+
+    if (pendingVideoIndex === null) {
+      const remaining = video.duration - video.currentTime
+      if (remaining <= SKIP_END + CROSSFADE_DURATION) {
+        queueNextVideo()
+      }
+    }
+  }
+
+  const handleEnded = (layer: 0 | 1) => {
+    if (layer !== activeLayer) return
+    const video = videoRefs.current[layer]
+    if (videoList.length <= 1) {
+      if (video) {
+        ensureWithinPlayableRange(video)
+        video.play().catch((e) => console.error("Loop play failed:", e))
+      }
+      return
+    }
+    queueNextVideo()
+  }
+
+  const handleError = (layer: 0 | 1, e: Event) => {
+    const video = videoRefs.current[layer]
+    console.error("Video error:", e, video?.error)
+  }
+
   useEffect(() => {
-    const video = videoRef.current
-    if (!video || videoList.length === 0) return
-    setIsVideoReady(false)
-    setVideoOpacity(0)
-    let isTransitioning = false
-
-    // Apply opacity fade for the first/last 0.75s of playable segment (after skips)
-    const updateVideoOpacity = () => {
-      if (!video.duration) {
-        setVideoOpacity(0)
-        return
-      }
-
-      const playableStart = SKIP_START
-      const playableEnd = video.duration - SKIP_END
-
-      // If the video is too short after skips, keep it fully visible
-      if (playableEnd - playableStart <= FADE_DURATION * 2) {
-        setVideoOpacity(1)
-        return
-      }
-
-      const fadeInEnd = playableStart + FADE_DURATION
-      const fadeOutStart = playableEnd - FADE_DURATION
-      const current = video.currentTime
-
-      let nextOpacity = 1
-
-      if (current < playableStart) {
-        nextOpacity = 0
-      } else if (current <= fadeInEnd) {
-        nextOpacity = Math.min(1, Math.max(0, (current - playableStart) / FADE_DURATION))
-      } else if (current >= fadeOutStart) {
-        nextOpacity = Math.min(1, Math.max(0, (playableEnd - current) / FADE_DURATION))
-      } else {
-        nextOpacity = 1
-      }
-
-      setVideoOpacity((prev) => (Math.abs(prev - nextOpacity) > 0.01 ? nextOpacity : prev))
-    }
-
-    // Ensure video starts at SKIP_START and doesn't go beyond duration - SKIP_END
-    const enforceTimeBounds = () => {
-      if (!video.duration) return
-      
-      // If video is too short, just play it normally
-      if (video.duration <= SKIP_START + SKIP_END) {
-        return
-      }
-
-      // Ensure we don't play the first 1.5 seconds
-      if (video.currentTime < SKIP_START) {
-        video.currentTime = SKIP_START
-      }
-
-      // Ensure we don't play the last 1.5 seconds
-      if (video.currentTime >= video.duration - SKIP_END) {
-        isTransitioning = true
-        const nextIndex = (currentVideoIndex + 1) % videoList.length
-        console.log("Reached end threshold, moving to next video:", nextIndex)
-        setCurrentVideoIndex(nextIndex)
-      }
-    }
-
-    const handleLoadedMetadata = () => {
-      if (video.duration && video.duration > SKIP_START + SKIP_END) {
-        video.currentTime = SKIP_START
-      }
-      setIsVideoReady(true)
-      updateVideoOpacity()
-      console.log("Video metadata loaded, duration:", video.duration)
-    }
-
-    const handleSeeked = () => {
-      // Ensure we're still within bounds after seeking
-      enforceTimeBounds()
-      updateVideoOpacity()
-    }
-
-    const handleCanPlay = async () => {
-      isTransitioning = false
-      // Ensure we start at SKIP_START
-      if (video.duration && video.duration > SKIP_START + SKIP_END) {
-        if (video.currentTime < SKIP_START) {
-          video.currentTime = SKIP_START
-        }
-      }
-      updateVideoOpacity()
-      console.log("Video can play")
-      try {
-        await video.play()
-        console.log("Video playing successfully")
-      } catch (error) {
-        console.error("Error playing video:", error)
-        setTimeout(() => {
-          video.play().catch(e => console.error("Retry failed:", e))
-        }, 100)
-      }
-    }
-
-    const handleLoadedData = () => {
-      // Ensure we start at SKIP_START
-      if (video.duration && video.duration > SKIP_START + SKIP_END) {
-        if (video.currentTime < SKIP_START) {
-          video.currentTime = SKIP_START
-        }
-      }
-      updateVideoOpacity()
-      if (video.paused) {
-        video.play().catch(e => console.error("Play on loaded data failed:", e))
-      }
-    }
-
-    const handleTimeUpdate = () => {
-      if (isTransitioning) return
-      enforceTimeBounds()
-      updateVideoOpacity()
-    }
-
-    const handleEnded = () => {
-      if (!isTransitioning) {
-        isTransitioning = true
-        const nextIndex = (currentVideoIndex + 1) % videoList.length
-        console.log("Video ended, moving to:", nextIndex)
-        setCurrentVideoIndex(nextIndex)
-      }
-    }
-
-    const handleError = (e: Event) => {
-      console.error("Video error:", e, video.error)
-    }
-
-    video.addEventListener("loadedmetadata", handleLoadedMetadata)
-    video.addEventListener("seeked", handleSeeked)
-    video.addEventListener("canplay", handleCanPlay)
-    video.addEventListener("loadeddata", handleLoadedData)
-    video.addEventListener("timeupdate", handleTimeUpdate)
-    video.addEventListener("ended", handleEnded)
-    video.addEventListener("error", handleError)
-
-    video.load()
-    updateVideoOpacity()
-    
-    const playTimeout = setTimeout(() => {
-      if (video.paused && video.readyState >= 2) {
-        // Ensure we start at SKIP_START before playing
-        if (video.duration && video.duration > SKIP_START + SKIP_END) {
-          if (video.currentTime < SKIP_START) {
-            video.currentTime = SKIP_START
-          }
-        }
-        video.play().catch(e => console.error("Delayed play failed:", e))
-      }
-    }, 500)
-
-    return () => {
-      clearTimeout(playTimeout)
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata)
-      video.removeEventListener("seeked", handleSeeked)
-      video.removeEventListener("canplay", handleCanPlay)
-      video.removeEventListener("loadeddata", handleLoadedData)
-      video.removeEventListener("timeupdate", handleTimeUpdate)
-      video.removeEventListener("ended", handleEnded)
-      video.removeEventListener("error", handleError)
-    }
-  }, [videoList, currentVideoIndex])
+    if (videoList.length === 0) return
+    setLayerSources((prev) => {
+      if (prev[activeLayer] === videoList[currentVideoIndex]) return prev
+      const next = [...prev]
+      next[activeLayer] = videoList[currentVideoIndex]
+      return next
+    })
+  }, [videoList, activeLayer, currentVideoIndex])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -281,25 +239,39 @@ export function HeroSection() {
         style={{ background: 'transparent' }}
       >
       {/* Video background - positioned below header - hidden on mobile, visible on desktop */}
-      {videoList.length > 0 && videoList[currentVideoIndex] && (
-        <video
-          ref={videoRef}
-          className="hidden md:block absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] object-contain"
-          style={{ 
-            zIndex: 0,
-            opacity: isVideoReady ? videoOpacity : 0,
-            transition: 'opacity 0.2s linear',
-            top: '72px'
-          }}
-          muted
-          playsInline
-          autoPlay
-          loop={false}
-          preload="auto"
-          src={videoList[currentVideoIndex]}
-          key={`video-${currentVideoIndex}-${videoList[currentVideoIndex]}`}
-        />
-      )}
+      {[0, 1].map((layer) => {
+        const typedLayer = layer as 0 | 1
+        const source = layerSources[typedLayer]
+        if (!source) return null
+
+        return (
+          <video
+            key={`video-layer-${typedLayer}-${source}`}
+            ref={(node) => {
+              videoRefs.current[typedLayer] = node
+            }}
+            className="hidden md:block absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] object-contain"
+            style={{ 
+              zIndex: 0,
+              opacity: layerOpacity[typedLayer],
+              transition: `opacity ${CROSSFADE_DURATION}s linear`,
+              top: '72px',
+              pointerEvents: 'none'
+            }}
+            muted
+            playsInline
+            autoPlay
+            loop={false}
+            preload="auto"
+            src={source}
+            onLoadedMetadata={() => handleLoadedMetadata(typedLayer)}
+            onCanPlay={() => handleCanPlay(typedLayer)}
+            onTimeUpdate={() => handleTimeUpdate(typedLayer)}
+            onEnded={() => handleEnded(typedLayer)}
+            onError={(e) => handleError(typedLayer, e.nativeEvent)}
+          />
+        )
+      })}
 
       {/* Dark overlay for better text readability */}
       <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-[calc(100vh-72px)] bg-background/40" style={{ zIndex: 1, top: '72px' }} />
