@@ -9,24 +9,15 @@ const inter = Inter({
   variable: "--font-inter",
 })
 
-// Get the base URL for metadata (works in both dev and production)
-const getBaseUrl = () => {
-  // In production, use the actual domain or Vercel URL
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL
-  }
-  // Vercel automatically provides this
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
-  }
-  // Default to localhost for development
-  return "http://localhost:3000"
-}
-
-const baseUrl = getBaseUrl()
+// Canonical domain for all metadata (keeps social previews consistent)
+const canonicalBaseUrl = "https://www.emptyconsole.com"
+const baseUrl = canonicalBaseUrl
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
+  alternates: {
+    canonical: baseUrl,
+  },
   title: "Empty Console",
   description:
     "Empty Console is a team of students who came together due to their love of programming. Explore our projects, meet the team, and see what we've built.",
