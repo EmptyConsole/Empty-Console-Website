@@ -7,7 +7,7 @@ import { TeamMemberCard } from "@/components/team-member-card"
 const teamMembers = [
   {
     name: "HF_ang",
-    role: "Co-Founder",
+    role: "CTO & Co-Founder",
     // Hidden logo image before HF_ang's picture
     image: "/HF_ang PFP.png",
     // image: "/BetterEmptyConsoleLogo.png",
@@ -21,7 +21,7 @@ const teamMembers = [
   },
   {
     name: "ShyGuy",
-    role: "Co-Founder",
+    role: "CEO &Co-Founder",
     image: "/images (1).jpeg",
     bio: "ShyGuy oversees marketing, communications, and product positioning, while also contributing to development. He discovered technology at a young age and has developed strong skills in leadership and strategy. He plays a central role in shaping product vision, aligning the team, and communicating complex ideas clearly.",
     hobbies: [
@@ -34,7 +34,7 @@ const teamMembers = [
   },
   {
     name: "Emey",
-    role: "Co-Founder",
+    role: "Chief Creative Officer & Co-Founder",
     image: "/pixilart-1766028338678.png",
     bio: "Emey is the music composer and an artist on the team. He began coding later than the other members but learned extremely quickly. He enjoys exploring the intersection of music, art, and programming, bringing a unique audio-visual perspective to the team's projects. Through his view of everything, he consistently enhances user experience.",
     hobbies: [
