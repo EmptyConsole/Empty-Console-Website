@@ -21,7 +21,7 @@ const teamMembers = [
   },
   {
     name: "ShyGuy",
-    role: "CEO &Co-Founder",
+    role: "CEO & Co-Founder",
     image: "/images (1).jpeg",
     bio: "ShyGuy oversees marketing, communications, and product positioning, while also contributing to development. He discovered technology at a young age and has developed strong skills in leadership and strategy. He plays a central role in shaping product vision, aligning the team, and communicating complex ideas clearly.",
     hobbies: [
