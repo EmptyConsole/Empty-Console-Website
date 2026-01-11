@@ -19,7 +19,9 @@ interface ProjectCardProps {
 export function ProjectCard({ title, description, learnings, technologies, image, video, url, date }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
+  const [isInView, setIsInView] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
   const SKIP_START = 1.5 // seconds to skip at start
   const SKIP_END = 1.5 // seconds to skip at end
   const FADE_IN_DURATION = 0.25 // seconds for initial fade in (faster)
@@ -40,9 +42,32 @@ export function ProjectCard({ title, description, learnings, technologies, image
     return () => window.removeEventListener('resize', checkIsDesktop)
   }, [])
 
+  // Intersection Observer for mobile autoplay
+  useEffect(() => {
+    if (isDesktop || !video) return
+
+    const cardElement = cardRef.current
+    if (!cardElement) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsInView(entry.isIntersecting)
+        })
+      },
+      { threshold: 0.5 } // Play when 50% of card is visible
+    )
+
+    observer.observe(cardElement)
+    return () => observer.disconnect()
+  }, [isDesktop, video])
+
+  // Determine if video should play (desktop hover OR mobile in view)
+  const shouldPlayVideo = (isDesktop && isHovered) || (!isDesktop && isInView)
+
   useEffect(() => {
     const videoElement = videoRef.current
-    if (!videoElement || !video || !isHovered || !isDesktop) return
+    if (!videoElement || !video || !shouldPlayVideo) return
     setVideoOpacity(0)
 
     const updateVideoOpacity = () => {
@@ -122,7 +147,7 @@ export function ProjectCard({ title, description, learnings, technologies, image
       videoElement.removeEventListener("loadedmetadata", handleLoadedMetadata)
       videoElement.removeEventListener("canplay", handleCanPlay)
     }
-  }, [isHovered, video, isDesktop])
+  }, [shouldPlayVideo, video])
 
   const handleMouseEnter = () => {
     if (video && isDesktop) {
@@ -141,14 +166,26 @@ export function ProjectCard({ title, description, learnings, technologies, image
     }
   }
 
+  // Handle video pause when scrolling out of view on mobile
+  useEffect(() => {
+    if (isDesktop || !video) return
+    
+    if (!isInView && videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+      setVideoOpacity(0)
+    }
+  }, [isInView, isDesktop, video])
+
   return (
     <Card 
+      ref={cardRef}
       className="group bg-card rounded-2xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden h-full pt-0"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div className="relative w-full aspect-video overflow-hidden rounded-t-2xl">
-        {video && isHovered && isDesktop ? (
+        {video && shouldPlayVideo ? (
           <video
             ref={videoRef}
             src={video}
