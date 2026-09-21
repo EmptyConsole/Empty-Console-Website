@@ -66,27 +66,11 @@ const HERO_TERMS: {
 
 export default function Home() {
   const [booted, setBooted] = useState(false);
-  const [heroOrder, setHeroOrder] = useState<HeroTermId[]>([
-    "play",
-    "github",
-    "contact",
-  ]);
 
   useEffect(() => {
     if (!booted) return;
     return startSite();
   }, [booted]);
-
-  const bringFront = (id: HeroTermId, el: HTMLElement) => {
-    setHeroOrder((prev) =>
-      prev[prev.length - 1] === id
-        ? prev
-        : [...prev.filter((item) => item !== id), id],
-    );
-    el.removeAttribute("data-raising");
-    void el.offsetWidth;
-    el.setAttribute("data-raising", "");
-  };
 
   return (
     <>
@@ -125,34 +109,25 @@ export default function Home() {
             </div>
             <div className="hero-stack" aria-label="links">
               {HERO_TERMS.map((term) => (
-                  <article
-                    key={term.id}
-                    className="panel term hero-term"
-                    data-hero={term.id}
-                    data-print=""
-                    data-reveal=""
-                    tabIndex={0}
-                    style={{ zIndex: heroOrder.indexOf(term.id) + 1 }}
-                    onClick={(event) => bringFront(term.id, event.currentTarget)}
-                    onFocus={(event) => bringFront(term.id, event.currentTarget)}
-                    onAnimationEnd={(event) => {
-                      if (event.target !== event.currentTarget) return;
-                      if (event.animationName !== "term-raise") return;
-                      event.currentTarget.removeAttribute("data-raising");
-                    }}
-                  >
-                    <div className="titlebar">{term.title}</div>
-                    <div className="term-body">
-                      {term.lines.map((line) => (
-                        <div
-                          key={line.k}
-                          className={line.className ?? "ln"}
-                          data-k={line.k}
-                          {...(line.href ? { "data-href": line.href } : {})}
-                        />
-                      ))}
-                    </div>
-                  </article>
+                <article
+                  key={term.id}
+                  className="panel term hero-term"
+                  data-hero={term.id}
+                  data-print=""
+                  data-reveal=""
+                >
+                  <div className="titlebar">{term.title}</div>
+                  <div className="term-body">
+                    {term.lines.map((line) => (
+                      <div
+                        key={line.k}
+                        className={line.className ?? "ln"}
+                        data-k={line.k}
+                        {...(line.href ? { "data-href": line.href } : {})}
+                      />
+                    ))}
+                  </div>
+                </article>
               ))}
             </div>
           </div>

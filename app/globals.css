@@ -142,7 +142,7 @@ button {
   position: relative;
 }
 
-[data-reveal]:not(.is-revealing):not(.is-revealed) {
+[data-reveal]:not(.is-revealing):not(.is-revealed):not(.is-unloading) {
   --wipe: 0%;
   -webkit-mask-image: linear-gradient(
     to bottom right,
@@ -202,7 +202,8 @@ button {
   animation-delay: 0s, 0.07s;
 }
 
-[data-reveal].is-revealing::after {
+[data-reveal].is-revealing::after,
+[data-reveal].is-unloading::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -218,6 +219,41 @@ button {
   );
 }
 
+[data-reveal].is-unloading {
+  --wipe: 150%;
+  -webkit-mask-image: linear-gradient(
+    to bottom right,
+    #000 0%,
+    #000 var(--wipe),
+    transparent var(--wipe)
+  );
+  mask-image: linear-gradient(
+    to bottom right,
+    #000 0%,
+    #000 var(--wipe),
+    transparent var(--wipe)
+  );
+  animation: boot-diag-out 0.28s cubic-bezier(0.5, 0, 1, 0.5) both;
+}
+
+[data-reveal].is-unloading .titlebar,
+[data-reveal].is-unloading .term-body,
+[data-reveal].is-unloading .term-tabs {
+  -webkit-mask-image: linear-gradient(
+    to bottom right,
+    #000 0%,
+    #000 var(--wipe),
+    transparent var(--wipe)
+  );
+  mask-image: linear-gradient(
+    to bottom right,
+    #000 0%,
+    #000 var(--wipe),
+    transparent var(--wipe)
+  );
+  animation: boot-diag-out 0.28s cubic-bezier(0.5, 0, 1, 0.5) both;
+}
+
 [data-reveal].is-revealed,
 [data-reveal].is-revealed * {
   -webkit-mask-image: none;
@@ -226,16 +262,21 @@ button {
   opacity: 1;
 }
 
-[data-reveal].is-revealed[data-raising] {
-  animation: term-raise 0.18s steps(3, end);
-}
-
 @keyframes boot-diag {
   from {
     --wipe: 0%;
   }
   to {
     --wipe: 150%;
+  }
+}
+
+@keyframes boot-diag-out {
+  from {
+    --wipe: 150%;
+  }
+  to {
+    --wipe: 0%;
   }
 }
 
@@ -342,39 +383,51 @@ button {
 /* --- hero --- */
 
 .hero {
-  min-height: calc(100vh - var(--unit) * 4);
+  height: calc(100svh - var(--unit) * 4);
+  min-height: calc(100svh - var(--unit) * 4);
+  max-height: calc(100svh - var(--unit) * 4);
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: calc(var(--unit) * 4) calc(var(--unit) * 3);
+  justify-content: flex-start;
+  padding: calc(var(--unit) * 3) calc(var(--unit) * 3);
 }
 
 .hero-row {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: calc(var(--unit) * 4);
+  min-height: 0;
 }
 
 .hero-copy {
-  flex: 1 1 42%;
+  flex: 0 0 auto;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hero-stack {
   position: relative;
-  flex: 1 1 58%;
+  flex: 1 1 auto;
+  align-self: stretch;
   min-width: 0;
-  min-height: calc(var(--unit) * 36);
+  min-height: 0;
   isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(var(--unit) * 5);
 }
 
 .hero-term {
-  position: absolute;
-  width: calc(100% - var(--unit) * 6);
-  max-width: 420px;
-  cursor: pointer;
+  position: relative;
+  flex: 0 0 auto;
+  width: min(420px, 68%);
+  max-width: 100%;
   background: var(--bg);
   color: var(--fg);
   border: var(--term-bd) solid var(--edge);
@@ -383,18 +436,21 @@ button {
 }
 
 .hero-term[data-hero="contact"] {
-  top: 0;
-  left: 0;
+  align-self: flex-start;
+  margin-left: calc(var(--unit) * 6);
+  z-index: 3;
 }
 
 .hero-term[data-hero="github"] {
-  top: calc(var(--unit) * 2.5);
-  left: calc(var(--unit) * 3);
+  align-self: flex-end;
+  top: calc(var(--unit) * 4);
+  margin-right: 22%;
+  z-index: 2;
 }
 
 .hero-term[data-hero="play"] {
-  top: calc(var(--unit) * 5);
-  left: calc(var(--unit) * 6);
+  align-self: flex-start;
+  z-index: 1;
 }
 
 .hero-term .term-body {
@@ -410,37 +466,23 @@ button {
   animation-delay: 0.15s;
 }
 
-.hero-term[data-hero="contact"].is-revealing {
+.hero-term[data-hero="play"].is-revealing {
   animation-delay: 0.16s;
 }
 
-.hero-term[data-hero="contact"].is-revealing .titlebar,
-.hero-term[data-hero="contact"].is-revealing .term-body {
+.hero-term[data-hero="play"].is-revealing .titlebar,
+.hero-term[data-hero="play"].is-revealing .term-body {
   animation-delay: 0.23s;
 }
 
 .hero-term:hover,
 .hero-term:focus-visible {
-  z-index: auto;
   outline: none;
   transform: translate(calc(var(--term-bd) * -2), calc(var(--term-bd) * -2));
   box-shadow: calc(var(--term-bd) * 2) calc(var(--term-bd) * 2) 0 0 var(--dim);
   background: var(--bg);
   color: var(--fg);
   border-color: var(--edge);
-}
-
-.hero-term[data-raising] {
-  animation: term-raise 0.18s steps(3, end);
-}
-
-@keyframes term-raise {
-  from {
-    transform: translate(4px, 4px);
-  }
-  to {
-    transform: translate(calc(var(--term-bd) * -2), calc(var(--term-bd) * -2));
-  }
 }
 
 .kicker {
@@ -480,7 +522,8 @@ button {
 }
 
 .scroll-hint {
-  margin-top: calc(var(--unit) * 8);
+  margin-top: calc(var(--unit) * 2);
+  flex: 0 0 auto;
   font-family: var(--font);
   font-size: var(--fs);
   line-height: var(--lh);
@@ -656,6 +699,23 @@ body.booted .member:not(.is-pictured) .avatar-frame {
   opacity: 1;
 }
 
+.member.is-pictured.is-unloading .avatar-frame {
+  opacity: 1;
+  -webkit-mask-image: linear-gradient(
+    to bottom right,
+    #000 0%,
+    #000 var(--wipe),
+    transparent var(--wipe)
+  );
+  mask-image: linear-gradient(
+    to bottom right,
+    #000 0%,
+    #000 var(--wipe),
+    transparent var(--wipe)
+  );
+  animation: boot-diag-out 0.28s cubic-bezier(0.5, 0, 1, 0.5) both;
+}
+
 .member:nth-child(1).is-pictured.is-revealing .avatar-frame {
   animation-delay: 0.08s, 0.08s;
 }
@@ -801,21 +861,12 @@ button:focus-visible,
 
   .hero-stack {
     width: 100%;
-    min-height: calc(var(--unit) * 30);
+    flex: 1 1 auto;
+    min-height: 0;
   }
 
   .hero-term {
     max-width: none;
-  }
-
-  .hero-term[data-hero="github"] {
-    top: calc(var(--unit) * 2);
-    left: calc(var(--unit) * 2);
-  }
-
-  .hero-term[data-hero="play"] {
-    top: calc(var(--unit) * 4);
-    left: calc(var(--unit) * 4);
   }
 
   .team-row {
@@ -833,8 +884,3 @@ button:focus-visible,
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hero-term[data-raising] {
-    animation: none;
-  }
-}
