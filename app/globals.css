@@ -49,6 +49,20 @@ body.booting {
   overflow: hidden;
 }
 
+#site {
+  position: relative;
+  z-index: 1;
+}
+
+.snake-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 a {
   color: var(--fg);
   text-decoration: none;
@@ -143,32 +157,32 @@ button {
 }
 
 [data-reveal]:not(.is-revealing):not(.is-revealed):not(.is-unloading) {
-  --wipe: 0%;
+  --wipe: -12%;
   -webkit-mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
   mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
 }
 
 [data-reveal].is-revealing {
-  --wipe: 0%;
+  --wipe: -12%;
   -webkit-mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
   mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
@@ -177,16 +191,17 @@ button {
 
 [data-reveal].is-revealing .titlebar,
 [data-reveal].is-revealing .term-body,
-[data-reveal].is-revealing .term-tabs {
+[data-reveal].is-revealing .term-tabs,
+[data-reveal].is-revealing .term-frame {
   -webkit-mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
   mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
@@ -211,7 +226,6 @@ button {
   z-index: 6;
   background: linear-gradient(
     to bottom right,
-    transparent 0%,
     transparent calc(var(--wipe) - 3.4%),
     var(--member-accent, var(--fg)) calc(var(--wipe) - 1.2%),
     var(--member-accent, var(--fg)) var(--wipe),
@@ -223,13 +237,13 @@ button {
   --wipe: 150%;
   -webkit-mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
   mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
@@ -238,16 +252,17 @@ button {
 
 [data-reveal].is-unloading .titlebar,
 [data-reveal].is-unloading .term-body,
-[data-reveal].is-unloading .term-tabs {
+[data-reveal].is-unloading .term-tabs,
+[data-reveal].is-unloading .term-frame {
   -webkit-mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
   mask-image: linear-gradient(
     to bottom right,
-    #000 0%,
+    #000 -40%,
     #000 var(--wipe),
     transparent var(--wipe)
   );
@@ -264,7 +279,7 @@ button {
 
 @keyframes boot-diag {
   from {
-    --wipe: 0%;
+    --wipe: -12%;
   }
   to {
     --wipe: 150%;
@@ -276,7 +291,7 @@ button {
     --wipe: 150%;
   }
   to {
-    --wipe: 0%;
+    --wipe: -12%;
   }
 }
 
@@ -375,14 +390,35 @@ button {
   z-index: 2;
 }
 
-.chrome .chip {
+.chrome-end {
+  display: flex;
+  align-items: center;
+  gap: var(--unit);
   margin-bottom: calc(var(--unit) / 2 + var(--term-bd));
   align-self: center;
+}
+
+button.snake-add {
+  cursor: pointer;
+}
+
+button.snake-add:hover,
+button.snake-add:focus-visible {
+  background: var(--fg);
+  color: var(--bg);
+  outline: none;
+}
+
+button.snake-add:disabled {
+  color: var(--dim);
+  cursor: default;
 }
 
 /* --- hero --- */
 
 .hero {
+  position: relative;
+  isolation: isolate;
   height: calc(100svh - var(--unit) * 4);
   min-height: calc(100svh - var(--unit) * 4);
   max-height: calc(100svh - var(--unit) * 4);
@@ -421,6 +457,7 @@ button {
   flex-direction: column;
   justify-content: center;
   gap: calc(var(--unit) * 5);
+  margin-left: clamp(0px, 100vw - 1100px, 160px);
 }
 
 .hero-term {
@@ -458,21 +495,36 @@ button {
 }
 
 .term[data-reveal].is-revealing {
-  animation-duration: 0.92s;
+  animation-duration: 0.76s;
 }
 
 .term[data-reveal].is-revealing .titlebar,
 .term[data-reveal].is-revealing .term-body,
-.term[data-reveal].is-revealing .term-tabs {
-  animation-duration: 0.92s;
-  animation-delay: 0.18s;
+.term[data-reveal].is-revealing .term-tabs,
+.term[data-reveal].is-revealing .term-frame {
+  animation-duration: 0.76s;
+  animation-delay: 0.15s;
 }
 
 .term[data-reveal].is-unloading,
 .term[data-reveal].is-unloading .titlebar,
 .term[data-reveal].is-unloading .term-body,
-.term[data-reveal].is-unloading .term-tabs {
-  animation-duration: 0.64s;
+.term[data-reveal].is-unloading .term-tabs,
+.term[data-reveal].is-unloading .term-frame {
+  animation-duration: 0.52s;
+}
+
+/* Tabs, frame, and shell share one wipe so the top cannot show early. */
+#projects .term[data-reveal].is-revealing .titlebar,
+#projects .term[data-reveal].is-revealing .term-body,
+#projects .term[data-reveal].is-revealing .term-tabs,
+#projects .term[data-reveal].is-revealing .term-frame {
+  animation-delay: 0s;
+}
+
+/* Stay fully hidden until the wipe starts, including the tab overhang. */
+#projects .term[data-reveal]:not(.is-revealing):not(.is-revealed):not(.is-unloading) {
+  visibility: hidden;
 }
 
 .hero-term[data-hero="github"].is-revealing {
@@ -600,7 +652,9 @@ button {
   display: block;
 }
 
-.term-slot:has(.term.is-revealed) .term-stub {
+.term-slot:has(.term.is-revealed) .term-stub,
+.term-slot:has(.term.is-revealing) .term-stub,
+.term-slot:has(.term.is-unloading) .term-stub {
   visibility: hidden;
 }
 
@@ -609,6 +663,13 @@ button {
   color: var(--fg);
   position: relative;
   z-index: 1;
+}
+
+/* Frame and tabs are shifted up-left by the border width. Pull that
+   overhang into the terminal box so the diagonal load mask covers it. */
+#projects .term {
+  padding: var(--term-bd) 0 0 var(--term-bd);
+  margin: calc(var(--term-bd) * -1) 0 0 calc(var(--term-bd) * -1);
 }
 
 .term-tabs {
@@ -706,8 +767,8 @@ body.booted .member:not(.is-pictured) .avatar-frame {
     transparent var(--wipe)
   );
   animation:
-    boot-diag 0.92s cubic-bezier(0.5, 0, 1, 0.5) both,
-    boot-ink 0.36s steps(2, end) both;
+    boot-diag 0.76s cubic-bezier(0.5, 0, 1, 0.5) both,
+    boot-ink 0.3s steps(2, end) both;
 }
 
 .member.is-pictured.is-revealed .avatar-frame {
@@ -731,7 +792,7 @@ body.booted .member:not(.is-pictured) .avatar-frame {
     #000 var(--wipe),
     transparent var(--wipe)
   );
-  animation: boot-diag-out 0.64s cubic-bezier(0.5, 0, 1, 0.5) both;
+  animation: boot-diag-out 0.52s cubic-bezier(0.5, 0, 1, 0.5) both;
 }
 
 .member:nth-child(1).is-pictured.is-revealing .avatar-frame {
@@ -881,6 +942,7 @@ button:focus-visible,
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
+    margin-left: 0;
   }
 
   .hero-term {

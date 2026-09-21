@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BootOverlay from "@/components/BootOverlay";
+import SnakeField from "@/components/SnakeField";
 import { startSite } from "@/lib/site";
 
 type HeroTermId = "contact" | "github" | "play";
@@ -22,12 +23,13 @@ const HERO_TERMS: {
     title: "cat ./contact",
     lines: [
       { k: "$ cat ./contact" },
+      { k: "Shoot us an email!", className: "ln mag" },
       {
-        k: "Shoot us an email! consoleempty@gmail.com",
-        className: "ln mag",
+        k: "consoleempty@gmail.com",
         href: "mailto:consoleempty@gmail.com",
       },
-      { k: "Message us! Discord: emptyconsolegamedev" },
+      { k: "Message us!", className: "ln mag" },
+      { k: "Discord: emptyconsolegamedev" },
     ],
   },
   {
@@ -66,6 +68,7 @@ const HERO_TERMS: {
 
 export default function Home() {
   const [booted, setBooted] = useState(false);
+  const addSnake = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (!booted) return;
@@ -88,12 +91,23 @@ export default function Home() {
               usr
             </a>
           </nav>
-          <div className="chip" tabIndex={0}>
-            v0.0.1
+          <div className="chrome-end">
+            <button
+              type="button"
+              className="chip snake-add"
+              disabled={!booted}
+              onClick={() => addSnake.current?.()}
+            >
+              + snake
+            </button>
+            <div className="chip" tabIndex={0}>
+              v0.0.1
+            </div>
           </div>
         </header>
 
         <section id="home" className="hero">
+          {booted ? <SnakeField addRef={addSnake} /> : null}
           <div className="hero-row">
             <div className="hero-copy">
               <p className="kicker" data-k="./empty-console" />

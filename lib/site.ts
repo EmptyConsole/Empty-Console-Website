@@ -113,7 +113,7 @@ async function printTerm(term: HTMLElement) {
   pane.querySelectorAll<HTMLElement>(".ln").forEach((line) => {
     line.textContent = "";
   });
-  const tick = term.closest("#projects") ? 14 : 36;
+  const tick = term.closest("#projects") ? 12 : 30;
   await printPane(pane, cancelled, tick);
   if (cancelled()) return;
   delete term.dataset.printing;
@@ -248,7 +248,7 @@ export function startSite(): () => void {
       el.removeEventListener("animationend", onEnd);
       if (!el.classList.contains("is-revealing")) return;
       if (!isCurrentReveal(el, token)) return;
-      const tail = el.classList.contains("term") ? 480 : 100;
+      const tail = el.classList.contains("term") ? 400 : 100;
       window.setTimeout(() => {
         if (!isCurrentReveal(el, token)) return;
         settleReveal(el);
@@ -275,12 +275,12 @@ export function startSite(): () => void {
     const token = bumpReveal(el);
     cancelPrint(el);
     el.classList.remove("is-revealing", "is-revealed");
+    el.classList.add("is-unloading");
     if (reduceMotion) {
       resetTerm(el);
       return;
     }
     void el.offsetWidth;
-    el.classList.add("is-unloading");
     const finish = () => {
       if (!isCurrentReveal(el, token)) return;
       resetTerm(el);
@@ -328,10 +328,19 @@ export function startSite(): () => void {
     return el.hasAttribute("data-print");
   }
 
+  function hasScrolledPast(el: HTMLElement) {
+    return el.getBoundingClientRect().top < -16;
+  }
+
   function shouldReveal(el: HTMLElement) {
     if (el.matches(".hero-term")) return isInView(el);
     if (el.matches(".term[data-print]")) return isFullyOnScreen(el);
     return isInView(el);
+  }
+
+  function shouldConceal(el: HTMLElement) {
+    if (!isInView(el)) return true;
+    return el.closest("#projects") != null && hasScrolledPast(el);
   }
 
   const nodes = Array.from(
@@ -342,11 +351,8 @@ export function startSite(): () => void {
       entries.forEach((entry) => {
         const el = entry.target as HTMLElement;
         if (isReplayable(el)) {
-          if (entry.isIntersecting) {
-            if (shouldReveal(el)) revealEl(el);
-          } else {
-            concealEl(el);
-          }
+          if (shouldReveal(el)) revealEl(el);
+          else if (!entry.isIntersecting || shouldConceal(el)) concealEl(el);
           return;
         }
         if (!entry.isIntersecting) return;
@@ -362,7 +368,7 @@ export function startSite(): () => void {
     const syncReveal = (el: HTMLElement) => {
       if (isReplayable(el)) {
         if (shouldReveal(el)) revealEl(el);
-        else if (!isInView(el)) concealEl(el);
+        else if (shouldConceal(el)) concealEl(el);
         return;
       }
       if (
