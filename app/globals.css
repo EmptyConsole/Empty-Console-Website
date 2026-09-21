@@ -927,15 +927,23 @@ button:focus-visible,
   z-index: 3;
 }
 
-@media (max-width: 800px) {
-  .hero h1 {
-    font-size: 32px;
-    line-height: 32px;
+/* --- responsive: stacked hero --- */
+
+@media (max-width: 900px) {
+  .hero {
+    height: auto;
+    min-height: calc(100svh - var(--unit) * 4);
+    max-height: none;
   }
 
   .hero-row {
     flex-direction: column;
     align-items: stretch;
+    gap: calc(var(--unit) * 3);
+  }
+
+  .hero-copy {
+    flex: 0 0 auto;
   }
 
   .hero-stack {
@@ -943,14 +951,47 @@ button:focus-visible,
     flex: 1 1 auto;
     min-height: 0;
     margin-left: 0;
+    justify-content: flex-start;
+    gap: calc(var(--unit) * 3);
   }
 
-  .hero-term {
+  .hero-term,
+  .hero-term[data-hero="contact"],
+  .hero-term[data-hero="github"],
+  .hero-term[data-hero="play"] {
+    width: 100%;
     max-width: none;
+    align-self: stretch;
+    top: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .hero-term .term-body {
+    min-height: 0;
+  }
+}
+
+/* --- responsive: phones --- */
+
+@media (max-width: 800px) {
+  .hero h1 {
+    font-size: 32px;
+    line-height: 32px;
   }
 
   .team-row {
     grid-template-columns: 1fr;
+  }
+
+  .avatar-frame {
+    max-width: 256px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .member .term-body {
+    min-height: 0;
   }
 
   .page,

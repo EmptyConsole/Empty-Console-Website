@@ -291,6 +291,41 @@ export default function Home() {
               <div className="term-slot">
                 <div className="term-stub" aria-hidden="true">
                   <span>$ whoami</span>
+                  <span>shyguy</span>
+                </div>
+                <article
+                  className="panel term member"
+                  data-print=""
+                  data-reveal=""
+                  tabIndex={0}
+                  style={{ ["--member-accent" as string]: "#e23b3b" }}
+                >
+                <div className="titlebar">usr@shyguy</div>
+                <div className="term-body">
+                  <div className="avatar-frame">
+                    <img
+                      className="avatar"
+                      src="/assets/shyguy.webp"
+                      alt="ShyGuy"
+                      width={256}
+                      height={256}
+                    />
+                  </div>
+                  <div className="ln" data-k="$ whoami" />
+                  <div className="ln mag" data-k="ShyGuy" />
+                  <div className="ln" data-k="discord: shyguygamedev" />
+                  <div
+                    className="ln"
+                    data-k="role:    product positioning, design, code"
+                  />
+                  <div className="ln" data-k="status:  active" />
+                  <div className="ln dim" data-k="tty:     pts/2" />
+                </div>
+              </article>
+              </div>
+              <div className="term-slot">
+                <div className="term-stub" aria-hidden="true">
+                  <span>$ whoami</span>
                   <span>hucklberi</span>
                 </div>
                 <article
@@ -315,38 +350,6 @@ export default function Home() {
                   <div className="ln mag" data-k="HF_ang / hucklberi" />
                   <div className="ln" data-k="discord: basicallyahucklberi" />
                   <div className="ln" data-k="role:    code, design" />
-                  <div className="ln" data-k="status:  active" />
-                  <div className="ln dim" data-k="tty:     pts/2" />
-                </div>
-              </article>
-              </div>
-              <div className="term-slot">
-                <div className="term-stub" aria-hidden="true">
-                  <span>$ whoami</span>
-                  <span>shyguy</span>
-                </div>
-                <article
-                  className="panel term member"
-                  data-print=""
-                  data-reveal=""
-                  tabIndex={0}
-                  style={{ ["--member-accent" as string]: "#e23b3b" }}
-                >
-                <div className="titlebar">usr@shyguy</div>
-                <div className="term-body">
-                  <div className="avatar-frame">
-                    <img
-                      className="avatar"
-                      src="/assets/shyguy.webp"
-                      alt="ShyGuy"
-                      width={256}
-                      height={256}
-                    />
-                  </div>
-                  <div className="ln" data-k="$ whoami" />
-                  <div className="ln mag" data-k="ShyGuy" />
-                  <div className="ln" data-k="discord: shyguygamedev" />
-                  <div className="ln" data-k="role:    code, marketing" />
                   <div className="ln" data-k="status:  active" />
                   <div className="ln dim" data-k="tty:     pts/3" />
                 </div>
