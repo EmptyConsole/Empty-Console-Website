@@ -11,7 +11,7 @@
   --mag: #e14ea0;
   --edge: #c8c8c8;
   --inset: #4a4a4a;
-  --font: "Tiny5", ui-monospace, monospace;
+  --font: var(--font-tiny5), ui-monospace, monospace;
 }
 
 *,
