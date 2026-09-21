@@ -4,13 +4,89 @@ import { useEffect, useState } from "react";
 import BootOverlay from "@/components/BootOverlay";
 import { startSite } from "@/lib/site";
 
+type HeroTermId = "contact" | "github" | "play";
+
+type HeroLine = {
+  k: string;
+  className?: string;
+  href?: string;
+};
+
+const HERO_TERMS: {
+  id: HeroTermId;
+  title: string;
+  lines: HeroLine[];
+}[] = [
+  {
+    id: "contact",
+    title: "cat ./contact",
+    lines: [
+      { k: "$ cat ./contact" },
+      {
+        k: "Shoot us an email! consoleempty@gmail.com",
+        className: "ln mag",
+        href: "mailto:consoleempty@gmail.com",
+      },
+      { k: "Message us! Discord: emptyconsolegamedev" },
+    ],
+  },
+  {
+    id: "github",
+    title: "cat ./github",
+    lines: [
+      { k: "$ cat ./github" },
+      { k: "Check us out on github!", className: "ln mag" },
+      {
+        k: "https://github.com/EmptyConsole",
+        href: "https://github.com/EmptyConsole",
+      },
+      {
+        k: "Our latest project! https://github.com/EmptyConsole/Student-Atlas",
+        href: "https://github.com/EmptyConsole/Student-Atlas",
+      },
+    ],
+  },
+  {
+    id: "play",
+    title: "cat ./play",
+    lines: [
+      { k: "$ cat ./play" },
+      {
+        k: "Check out our Itch.io! https://emptyconsole.itch.io/",
+        className: "ln mag",
+        href: "https://emptyconsole.itch.io/",
+      },
+      {
+        k: "Play a game! https://emptyconsole.itch.io/bugged-out",
+        href: "https://emptyconsole.itch.io/bugged-out",
+      },
+    ],
+  },
+];
+
 export default function Home() {
   const [booted, setBooted] = useState(false);
+  const [heroOrder, setHeroOrder] = useState<HeroTermId[]>([
+    "play",
+    "github",
+    "contact",
+  ]);
 
   useEffect(() => {
     if (!booted) return;
     return startSite();
   }, [booted]);
+
+  const bringFront = (id: HeroTermId, el: HTMLElement) => {
+    setHeroOrder((prev) =>
+      prev[prev.length - 1] === id
+        ? prev
+        : [...prev.filter((item) => item !== id), id],
+    );
+    el.removeAttribute("data-raising");
+    void el.offsetWidth;
+    el.setAttribute("data-raising", "");
+  };
 
   return (
     <>
@@ -34,17 +110,51 @@ export default function Home() {
         </header>
 
         <section id="home" className="hero">
-          <div className="hero-copy">
-            <p className="kicker" data-k="./empty-console" />
-            <h1 data-k="EMPTY CONSOLE" />
-            <p className="prompt">
-              <span data-k="$ ls /" />
-              <span className="cursor">█</span>
-            </p>
-            <p className="hero-ls">
-              <a href="#projects">projects/</a>
-              <a href="#team">usr/</a>
-            </p>
+          <div className="hero-row">
+            <div className="hero-copy">
+              <p className="kicker" data-k="./empty-console" />
+              <h1 data-k="EMPTY CONSOLE" />
+              <p className="prompt">
+                <span data-k="$ ls /" />
+                <span className="cursor">█</span>
+              </p>
+              <p className="hero-ls">
+                <a href="#projects">projects/</a>
+                <a href="#team">usr/</a>
+              </p>
+            </div>
+            <div className="hero-stack" aria-label="links">
+              {HERO_TERMS.map((term) => (
+                  <article
+                    key={term.id}
+                    className="panel term hero-term"
+                    data-hero={term.id}
+                    data-print=""
+                    data-reveal=""
+                    tabIndex={0}
+                    style={{ zIndex: heroOrder.indexOf(term.id) + 1 }}
+                    onClick={(event) => bringFront(term.id, event.currentTarget)}
+                    onFocus={(event) => bringFront(term.id, event.currentTarget)}
+                    onAnimationEnd={(event) => {
+                      if (event.target !== event.currentTarget) return;
+                      if (event.animationName !== "term-raise") return;
+                      event.currentTarget.removeAttribute("data-raising");
+                    }}
+                  >
+                    <div className="titlebar">{term.title}</div>
+                    <div className="term-body">
+                      {term.lines.map((line) => (
+                        <div
+                          key={line.k}
+                          className={line.className ?? "ln"}
+                          data-k={line.k}
+                          {...(line.href ? { "data-href": line.href } : {})}
+                        />
+                      ))}
+                    </div>
+                  </article>
+              ))}
+            </div>
           </div>
           <p className="scroll-hint">v scroll to mount</p>
         </section>
@@ -54,12 +164,17 @@ export default function Home() {
             <h2 className="block-label" data-reveal>
               # ./projects
             </h2>
-            <article
-              className="term"
-              data-print=""
-              data-reveal=""
-              tabIndex={0}
-            >
+            <div className="term-slot">
+              <div className="term-stub" aria-hidden="true">
+                <span>$ ls ./projects</span>
+                <span>student_atlas  propose</span>
+              </div>
+              <article
+                className="term"
+                data-print=""
+                data-reveal=""
+                tabIndex={0}
+              >
               <div className="term-tabs" role="tablist" aria-label="projects">
                 <button
                   className="tab is-on"
@@ -144,6 +259,7 @@ export default function Home() {
                 </div>
               </div>
             </article>
+            </div>
           </section>
 
           <section id="team" className="block">
@@ -151,13 +267,18 @@ export default function Home() {
               # ./usr
             </h2>
             <div className="team-row">
-              <article
-                className="panel term member"
-                data-print=""
-                data-reveal=""
-                tabIndex={0}
-                style={{ ["--member-accent" as string]: "#2dd4bf" }}
-              >
+              <div className="term-slot">
+                <div className="term-stub" aria-hidden="true">
+                  <span>$ whoami</span>
+                  <span>emey</span>
+                </div>
+                <article
+                  className="panel term member"
+                  data-print=""
+                  data-reveal=""
+                  tabIndex={0}
+                  style={{ ["--member-accent" as string]: "#2dd4bf" }}
+                >
                 <div className="titlebar">usr@emey</div>
                 <div className="term-body">
                   <div className="avatar-frame">
@@ -177,13 +298,19 @@ export default function Home() {
                   <div className="ln dim" data-k="tty:     pts/1" />
                 </div>
               </article>
-              <article
-                className="panel term member"
-                data-print=""
-                data-reveal=""
-                tabIndex={0}
-                style={{ ["--member-accent" as string]: "#f5c518" }}
-              >
+              </div>
+              <div className="term-slot">
+                <div className="term-stub" aria-hidden="true">
+                  <span>$ whoami</span>
+                  <span>hucklberi</span>
+                </div>
+                <article
+                  className="panel term member"
+                  data-print=""
+                  data-reveal=""
+                  tabIndex={0}
+                  style={{ ["--member-accent" as string]: "#f5c518" }}
+                >
                 <div className="titlebar">usr@hucklberi</div>
                 <div className="term-body">
                   <div className="avatar-frame">
@@ -203,13 +330,19 @@ export default function Home() {
                   <div className="ln dim" data-k="tty:     pts/2" />
                 </div>
               </article>
-              <article
-                className="panel term member"
-                data-print=""
-                data-reveal=""
-                tabIndex={0}
-                style={{ ["--member-accent" as string]: "#e23b3b" }}
-              >
+              </div>
+              <div className="term-slot">
+                <div className="term-stub" aria-hidden="true">
+                  <span>$ whoami</span>
+                  <span>shyguy</span>
+                </div>
+                <article
+                  className="panel term member"
+                  data-print=""
+                  data-reveal=""
+                  tabIndex={0}
+                  style={{ ["--member-accent" as string]: "#e23b3b" }}
+                >
                 <div className="titlebar">usr@shyguy</div>
                 <div className="term-body">
                   <div className="avatar-frame">
@@ -229,6 +362,7 @@ export default function Home() {
                   <div className="ln dim" data-k="tty:     pts/3" />
                 </div>
               </article>
+              </div>
             </div>
           </section>
         </main>

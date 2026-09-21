@@ -15,7 +15,12 @@ function scramble(text: string) {
 function linkify(el: HTMLElement, text: string) {
   const href = el.dataset.href;
   if (!href) return;
-  const idx = text.indexOf(href);
+  let needle = href;
+  let idx = text.indexOf(href);
+  if (idx === -1 && href.startsWith("mailto:")) {
+    needle = href.slice("mailto:".length);
+    idx = text.indexOf(needle);
+  }
   if (idx === -1) return;
   el.replaceChildren();
   if (idx > 0) el.append(text.slice(0, idx));
@@ -23,10 +28,10 @@ function linkify(el: HTMLElement, text: string) {
   a.href = href;
   a.target = "_blank";
   a.rel = "noopener noreferrer";
-  a.textContent = href;
+  a.textContent = needle;
   el.append(a);
-  if (idx + href.length < text.length) {
-    el.append(text.slice(idx + href.length));
+  if (idx + needle.length < text.length) {
+    el.append(text.slice(idx + needle.length));
   }
 }
 
@@ -165,9 +170,7 @@ export function startSite(): () => void {
     }
     if (reduceMotion) {
       settleReveal(el);
-      if (el.hasAttribute("data-print") && !el.classList.contains("is-printed")) {
-        void printTerm(el);
-      }
+      if (shouldPrintOnReveal(el)) void printTerm(el);
       return;
     }
     el.classList.add("is-revealing");
@@ -179,10 +182,13 @@ export function startSite(): () => void {
     el.addEventListener("animationend", onEnd);
     window.setTimeout(() => {
       if (el.classList.contains("is-revealing")) settleReveal(el);
-    }, 560);
-    if (el.hasAttribute("data-print") && !el.classList.contains("is-printed")) {
-      void printTerm(el);
-    }
+    }, 720);
+    if (shouldPrintOnReveal(el)) void printTerm(el);
+  }
+
+  function chromeBottom() {
+    const chrome = document.querySelector<HTMLElement>(".chrome");
+    return chrome ? chrome.getBoundingClientRect().bottom : 0;
   }
 
   function isInView(el: HTMLElement) {
@@ -193,6 +199,35 @@ export function startSite(): () => void {
     return visible / rect.height >= 0.12;
   }
 
+  function isFullyOnScreen(el: HTMLElement) {
+    const rect = el.getBoundingClientRect();
+    const viewH = window.innerHeight;
+    const viewW = window.innerWidth;
+    if (rect.height <= 0 || rect.width <= 0) return false;
+    const topPad = chromeBottom();
+    const availH = viewH - topPad;
+    const fullyHoriz = rect.left >= -2 && rect.right <= viewW + 2;
+    if (rect.width <= viewW + 4 && !fullyHoriz) return false;
+    if (rect.height <= availH + 4) {
+      return rect.top >= topPad - 2 && rect.bottom <= viewH + 2;
+    }
+    return rect.top <= topPad + 2 && rect.bottom >= viewH - 2;
+  }
+
+  function shouldPrintOnReveal(el: HTMLElement) {
+    return (
+      el.hasAttribute("data-print") &&
+      !el.classList.contains("is-printed") &&
+      !el.classList.contains("hero-term")
+    );
+  }
+
+  function shouldReveal(el: HTMLElement) {
+    if (el.matches(".hero-term")) return isInView(el);
+    if (el.matches(".term[data-print]")) return isFullyOnScreen(el);
+    return isInView(el);
+  }
+
   const nodes = Array.from(
     document.querySelectorAll<HTMLElement>("[data-reveal]"),
   );
@@ -200,11 +235,13 @@ export function startSite(): () => void {
     (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        revealEl(entry.target as HTMLElement);
-        io.unobserve(entry.target);
+        const el = entry.target as HTMLElement;
+        if (!shouldReveal(el)) return;
+        revealEl(el);
+        io.unobserve(el);
       });
     },
-    { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+    { threshold: [0.12, 1], rootMargin: "0px" },
   );
 
   function watchReveal() {
@@ -215,7 +252,10 @@ export function startSite(): () => void {
       ) {
         return;
       }
-      if (isInView(el)) revealEl(el);
+      if (shouldReveal(el)) {
+        revealEl(el);
+        io.unobserve(el);
+      }
     };
     nodes.forEach((el) => {
       io.observe(el);
@@ -228,10 +268,29 @@ export function startSite(): () => void {
       },
       { passive: true, signal },
     );
+    window.addEventListener(
+      "resize",
+      () => {
+        nodes.forEach(revealIfVisible);
+      },
+      { signal },
+    );
+  }
+
+  function printHeroTerm(term: HTMLElement) {
+    if (term.classList.contains("is-printed")) return;
+    if (term.dataset.printing === "1") return;
+    term.dataset.printing = "1";
+    void printTerm(term);
   }
 
   async function printHero() {
-    const heroNodes = document.querySelectorAll<HTMLElement>(".hero [data-k]");
+    document
+      .querySelectorAll<HTMLElement>(".hero-term")
+      .forEach((term) => printHeroTerm(term));
+    const heroNodes = document.querySelectorAll<HTMLElement>(
+      ".hero-copy [data-k]",
+    );
     for (const el of heroNodes) {
       if (stopped) return;
       await printLine(el, el.dataset.k ?? "", () => stopped);

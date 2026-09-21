@@ -226,6 +226,10 @@ button {
   opacity: 1;
 }
 
+[data-reveal].is-revealed[data-raising] {
+  animation: term-raise 0.18s steps(3, end);
+}
+
 @keyframes boot-diag {
   from {
     --wipe: 0%;
@@ -345,6 +349,100 @@ button {
   padding: calc(var(--unit) * 4) calc(var(--unit) * 3);
 }
 
+.hero-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--unit) * 4);
+}
+
+.hero-copy {
+  flex: 1 1 42%;
+  min-width: 0;
+}
+
+.hero-stack {
+  position: relative;
+  flex: 1 1 58%;
+  min-width: 0;
+  min-height: calc(var(--unit) * 36);
+  isolation: isolate;
+}
+
+.hero-term {
+  position: absolute;
+  width: calc(100% - var(--unit) * 6);
+  max-width: 420px;
+  cursor: pointer;
+  background: var(--bg);
+  color: var(--fg);
+  border: var(--term-bd) solid var(--edge);
+  transform: translate(calc(var(--term-bd) * -1), calc(var(--term-bd) * -1));
+  box-shadow: var(--term-bd) var(--term-bd) 0 0 var(--dim);
+}
+
+.hero-term[data-hero="contact"] {
+  top: 0;
+  left: 0;
+}
+
+.hero-term[data-hero="github"] {
+  top: calc(var(--unit) * 2.5);
+  left: calc(var(--unit) * 3);
+}
+
+.hero-term[data-hero="play"] {
+  top: calc(var(--unit) * 5);
+  left: calc(var(--unit) * 6);
+}
+
+.hero-term .term-body {
+  min-height: calc(var(--unit) * 16);
+}
+
+.hero-term[data-hero="github"].is-revealing {
+  animation-delay: 0.08s;
+}
+
+.hero-term[data-hero="github"].is-revealing .titlebar,
+.hero-term[data-hero="github"].is-revealing .term-body {
+  animation-delay: 0.15s;
+}
+
+.hero-term[data-hero="contact"].is-revealing {
+  animation-delay: 0.16s;
+}
+
+.hero-term[data-hero="contact"].is-revealing .titlebar,
+.hero-term[data-hero="contact"].is-revealing .term-body {
+  animation-delay: 0.23s;
+}
+
+.hero-term:hover,
+.hero-term:focus-visible {
+  z-index: auto;
+  outline: none;
+  transform: translate(calc(var(--term-bd) * -2), calc(var(--term-bd) * -2));
+  box-shadow: calc(var(--term-bd) * 2) calc(var(--term-bd) * 2) 0 0 var(--dim);
+  background: var(--bg);
+  color: var(--fg);
+  border-color: var(--edge);
+}
+
+.hero-term[data-raising] {
+  animation: term-raise 0.18s steps(3, end);
+}
+
+@keyframes term-raise {
+  from {
+    transform: translate(4px, 4px);
+  }
+  to {
+    transform: translate(calc(var(--term-bd) * -2), calc(var(--term-bd) * -2));
+  }
+}
+
 .kicker {
   font-family: var(--font);
   font-size: var(--fs);
@@ -414,10 +512,42 @@ button {
 
 /* --- terminals --- */
 
+.term-slot {
+  position: relative;
+}
+
+.term-stub {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--dim);
+  font-family: var(--font);
+  font-size: 12px;
+  line-height: 12px;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  white-space: pre;
+}
+
+.term-stub span {
+  display: block;
+}
+
+.term-slot:has(.term.is-revealed) .term-stub {
+  visibility: hidden;
+}
+
 .term {
   background: var(--bg);
   color: var(--fg);
   position: relative;
+  z-index: 1;
 }
 
 .term-tabs {
@@ -560,7 +690,7 @@ body.booted .member:not(.is-pictured) .avatar-frame {
 }
 
 .ln a {
-  color: inherit;
+  color: var(--dim);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -602,7 +732,7 @@ body.booted .member:not(.is-pictured) .avatar-frame {
   border-color: var(--member-accent);
 }
 
-.term[data-print]:not(.is-printed) .ln {
+.term[data-print]:not(.is-printed):not(.hero-term) .ln {
   color: var(--dim);
 }
 
@@ -664,6 +794,30 @@ button:focus-visible,
     line-height: 32px;
   }
 
+  .hero-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-stack {
+    width: 100%;
+    min-height: calc(var(--unit) * 30);
+  }
+
+  .hero-term {
+    max-width: none;
+  }
+
+  .hero-term[data-hero="github"] {
+    top: calc(var(--unit) * 2);
+    left: calc(var(--unit) * 2);
+  }
+
+  .hero-term[data-hero="play"] {
+    top: calc(var(--unit) * 4);
+    left: calc(var(--unit) * 4);
+  }
+
   .team-row {
     grid-template-columns: 1fr;
   }
@@ -676,5 +830,11 @@ button:focus-visible,
 
   .chrome {
     padding-right: calc(var(--unit) * 2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-term[data-raising] {
+    animation: none;
   }
 }
