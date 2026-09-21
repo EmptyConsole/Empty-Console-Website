@@ -457,22 +457,40 @@ button {
   min-height: calc(var(--unit) * 16);
 }
 
+.term[data-reveal].is-revealing {
+  animation-duration: 0.92s;
+}
+
+.term[data-reveal].is-revealing .titlebar,
+.term[data-reveal].is-revealing .term-body,
+.term[data-reveal].is-revealing .term-tabs {
+  animation-duration: 0.92s;
+  animation-delay: 0.18s;
+}
+
+.term[data-reveal].is-unloading,
+.term[data-reveal].is-unloading .titlebar,
+.term[data-reveal].is-unloading .term-body,
+.term[data-reveal].is-unloading .term-tabs {
+  animation-duration: 0.64s;
+}
+
 .hero-term[data-hero="github"].is-revealing {
-  animation-delay: 0.08s;
+  animation-delay: 0.22s;
 }
 
 .hero-term[data-hero="github"].is-revealing .titlebar,
 .hero-term[data-hero="github"].is-revealing .term-body {
-  animation-delay: 0.15s;
+  animation-delay: 0.4s;
 }
 
 .hero-term[data-hero="play"].is-revealing {
-  animation-delay: 0.16s;
+  animation-delay: 0.44s;
 }
 
 .hero-term[data-hero="play"].is-revealing .titlebar,
 .hero-term[data-hero="play"].is-revealing .term-body {
-  animation-delay: 0.23s;
+  animation-delay: 0.62s;
 }
 
 .hero-term:hover,
@@ -688,8 +706,8 @@ body.booted .member:not(.is-pictured) .avatar-frame {
     transparent var(--wipe)
   );
   animation:
-    boot-diag 0.42s cubic-bezier(0.5, 0, 1, 0.5) both,
-    boot-ink 0.18s steps(2, end) both;
+    boot-diag 0.92s cubic-bezier(0.5, 0, 1, 0.5) both,
+    boot-ink 0.36s steps(2, end) both;
 }
 
 .member.is-pictured.is-revealed .avatar-frame {
@@ -713,19 +731,19 @@ body.booted .member:not(.is-pictured) .avatar-frame {
     #000 var(--wipe),
     transparent var(--wipe)
   );
-  animation: boot-diag-out 0.28s cubic-bezier(0.5, 0, 1, 0.5) both;
+  animation: boot-diag-out 0.64s cubic-bezier(0.5, 0, 1, 0.5) both;
 }
 
 .member:nth-child(1).is-pictured.is-revealing .avatar-frame {
-  animation-delay: 0.08s, 0.08s;
+  animation-delay: 0.12s, 0.12s;
 }
 
 .member:nth-child(2).is-pictured.is-revealing .avatar-frame {
-  animation-delay: 0.16s, 0.16s;
+  animation-delay: 0.24s, 0.24s;
 }
 
 .member:nth-child(3).is-pictured.is-revealing .avatar-frame {
-  animation-delay: 0.24s, 0.24s;
+  animation-delay: 0.36s, 0.36s;
 }
 
 @media (prefers-reduced-motion: reduce) {

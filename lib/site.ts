@@ -8,8 +8,13 @@ const sleep = (ms: number) =>
     window.setTimeout(resolve, ms);
   });
 
-function scramble(text: string) {
-  return Array.from(text, (ch) => (ch === " " ? " " : randGlyph())).join("");
+function scrambleSlice(text: string, start: number, end: number) {
+  let out = "";
+  for (let i = start; i < end; i += 1) {
+    const ch = text[i];
+    out += ch === " " ? " " : randGlyph();
+  }
+  return out;
 }
 
 function linkify(el: HTMLElement, text: string) {
@@ -39,25 +44,38 @@ async function printLine(
   el: HTMLElement,
   text: string,
   cancelled: () => boolean,
+  tick = 16,
 ) {
-  const frames = 4;
-  for (let i = 0; i < frames; i += 1) {
-    if (cancelled()) return;
-    el.textContent = scramble(text);
-    await sleep(28);
+  const len = text.length;
+  if (len === 0) {
+    el.textContent = "";
+    return;
   }
-  el.textContent = "";
-  for (let i = 0; i < text.length; i += 1) {
+  const maxWindow = Math.min(6, len);
+  let resolved = 0;
+  let span = 1;
+
+  while (resolved < len) {
     if (cancelled()) return;
-    el.textContent = text.slice(0, i + 1);
-    if (i % 2 === 1) await sleep(12);
+    const scrambleCount = Math.min(span, len - resolved);
+    el.textContent =
+      text.slice(0, resolved) +
+      scrambleSlice(text, resolved, resolved + scrambleCount);
+    await sleep(tick);
+    resolved += 1;
+    if (span < maxWindow) span += 1;
   }
+
   if (cancelled()) return;
   el.textContent = text;
   linkify(el, text);
 }
 
-async function printPane(root: Element, cancelled: () => boolean) {
+async function printPane(
+  root: Element,
+  cancelled: () => boolean,
+  tick: number,
+) {
   const lines = root.querySelectorAll<HTMLElement>(".ln");
   for (const line of lines) {
     if (cancelled()) return;
@@ -66,7 +84,7 @@ async function printPane(root: Element, cancelled: () => boolean) {
       line.textContent = "";
       continue;
     }
-    await printLine(line, text, cancelled);
+    await printLine(line, text, cancelled, tick);
   }
 }
 
@@ -95,7 +113,8 @@ async function printTerm(term: HTMLElement) {
   pane.querySelectorAll<HTMLElement>(".ln").forEach((line) => {
     line.textContent = "";
   });
-  await printPane(pane, cancelled);
+  const tick = term.closest("#projects") ? 14 : 36;
+  await printPane(pane, cancelled, tick);
   if (cancelled()) return;
   delete term.dataset.printing;
   term.classList.add("is-printed");
@@ -229,16 +248,18 @@ export function startSite(): () => void {
       el.removeEventListener("animationend", onEnd);
       if (!el.classList.contains("is-revealing")) return;
       if (!isCurrentReveal(el, token)) return;
+      const tail = el.classList.contains("term") ? 480 : 100;
       window.setTimeout(() => {
         if (!isCurrentReveal(el, token)) return;
         settleReveal(el);
-      }, 100);
+      }, tail);
     };
     el.addEventListener("animationend", onEnd, { signal });
+    const revealLimit = el.classList.contains("term") ? 2000 : 720;
     window.setTimeout(() => {
       if (!isCurrentReveal(el, token)) return;
       if (el.classList.contains("is-revealing")) settleReveal(el);
-    }, 720);
+    }, revealLimit);
     if (shouldPrintOnReveal(el)) void printTerm(el);
   }
 
@@ -271,7 +292,8 @@ export function startSite(): () => void {
       finish();
     };
     el.addEventListener("animationend", onEnd, { signal });
-    window.setTimeout(finish, 720);
+    const concealLimit = el.classList.contains("term") ? 1200 : 720;
+    window.setTimeout(finish, concealLimit);
   }
 
   function chromeBottom() {
