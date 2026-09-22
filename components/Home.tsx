@@ -66,9 +66,51 @@ const HERO_TERMS: {
   },
 ];
 
+const READABLE_KEY = "ec-readable";
+
 export default function Home() {
   const [booted, setBooted] = useState(false);
+  const [readable, setReadable] = useState(false);
   const addSnake = useRef<(() => void) | null>(null);
+  const shiftTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const on = localStorage.getItem(READABLE_KEY) === "1";
+    setReadable(on);
+    document.documentElement.classList.toggle("readable", on);
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        document.documentElement.classList.add("ready");
+      });
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (shiftTimer.current != null) window.clearTimeout(shiftTimer.current);
+    };
+  }, []);
+
+  function toggleReadable() {
+    setReadable((prev) => {
+      const next = !prev;
+      const root = document.documentElement;
+      root.classList.toggle("readable", next);
+      localStorage.setItem(READABLE_KEY, next ? "1" : "0");
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (!reduce) {
+        root.classList.remove("is-shifting");
+        void root.offsetWidth;
+        root.classList.add("is-shifting");
+        if (shiftTimer.current != null) window.clearTimeout(shiftTimer.current);
+        shiftTimer.current = window.setTimeout(() => {
+          root.classList.remove("is-shifting");
+          shiftTimer.current = null;
+        }, 700);
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (!booted) return;
@@ -83,6 +125,9 @@ export default function Home() {
           <nav className="tabstrip" aria-label="sections">
             <a className="tab is-on" href="#home">
               Home
+            </a>
+            <a className="tab" href="#meet">
+              meet
             </a>
             <a className="tab" href="#projects">
               projects
@@ -99,6 +144,14 @@ export default function Home() {
               onClick={() => addSnake.current?.()}
             >
               + snake
+            </button>
+            <button
+              type="button"
+              className={readable ? "chip readable-toggle is-on" : "chip readable-toggle"}
+              aria-pressed={readable}
+              onClick={toggleReadable}
+            >
+              readable
             </button>
             <div className="chip" tabIndex={0}>
               v0.0.1
@@ -117,6 +170,7 @@ export default function Home() {
                 <span className="cursor">█</span>
               </p>
               <p className="hero-ls">
+                <a href="#meet">meet/</a>
                 <a href="#projects">projects/</a>
                 <a href="#team">usr/</a>
               </p>
@@ -149,6 +203,99 @@ export default function Home() {
         </section>
 
         <main className="page">
+          <section id="meet" className="block">
+            <h2 className="block-label" data-reveal>
+              # Meet the Team!
+            </h2>
+            <div className="term-slot">
+              <div className="term-stub" aria-hidden="true">
+                <span>$ ls ./meet</span>
+                <span>empty_console  contact</span>
+              </div>
+              <article
+                className="term deck"
+                data-print=""
+                data-reveal=""
+                tabIndex={0}
+              >
+                <div className="term-tabs" role="tablist" aria-label="Meet the Team">
+                  <button
+                    className="tab is-on"
+                    role="tab"
+                    aria-selected="true"
+                    data-tab="m1"
+                    id="tab-m1"
+                    type="button"
+                  >
+                    Empty Console
+                  </button>
+                  <button
+                    className="tab"
+                    role="tab"
+                    aria-selected="false"
+                    data-tab="m2"
+                    id="tab-m2"
+                    type="button"
+                  >
+                    Contact
+                  </button>
+                </div>
+                <div className="term-frame panel">
+                  <div className="titlebar">cat README</div>
+                  <div className="term-body">
+                    <div
+                      className="pane is-on"
+                      id="m1"
+                      role="tabpanel"
+                      aria-labelledby="tab-m1"
+                    >
+                      <div className="ln" data-k="$ cat ./meet/empty_console/README" />
+                      <div className="ln mag" data-k="Empty Console" />
+                      <div className="ln dim" data-k="/empty/meet/empty_console" />
+                      <div className="ln" data-k="" />
+                      <div className="ln" data-k="name:             Empty Console" />
+                      <div className="ln" data-k="size:             3" />
+                      <div
+                        className="ln"
+                        data-k="current project:  Student Atlas"
+                        data-href="https://github.com/EmptyConsole/Student-Atlas"
+                        data-link="Student Atlas"
+                      />
+                      <div className="ln" data-k="status:           active" />
+                      <div
+                        className="ln"
+                        data-k="description:      We build apps and websites for real life uses for schools, developers, and gamers!"
+                      />
+                    </div>
+                    <div
+                      className="pane"
+                      id="m2"
+                      role="tabpanel"
+                      aria-labelledby="tab-m2"
+                      hidden
+                    >
+                      <div className="ln" data-k="$ cat ./meet/contact" />
+                      <div className="ln mag" data-k="Contact" />
+                      <div className="ln dim" data-k="/empty/meet/contact" />
+                      <div className="ln" data-k="" />
+                      <div
+                        className="ln"
+                        data-k="github:   https://github.com/EmptyConsole"
+                        data-href="https://github.com/EmptyConsole"
+                      />
+                      <div className="ln" data-k="discord:  emptyconsolegamedev" />
+                      <div
+                        className="ln"
+                        data-k="email:    consoleempty@gmail.com"
+                        data-href="mailto:consoleempty@gmail.com"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+
           <section id="projects" className="block">
             <h2 className="block-label" data-reveal>
               # ./projects
@@ -159,7 +306,7 @@ export default function Home() {
                 <span>student_atlas  propose</span>
               </div>
               <article
-                className="term"
+                className="term deck"
                 data-print=""
                 data-reveal=""
                 tabIndex={0}

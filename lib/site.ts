@@ -20,9 +20,10 @@ function scrambleSlice(text: string, start: number, end: number) {
 function linkify(el: HTMLElement, text: string) {
   const href = el.dataset.href;
   if (!href) return;
-  let needle = href;
-  let idx = text.indexOf(href);
-  if (idx === -1 && href.startsWith("mailto:")) {
+  const label = el.dataset.link;
+  let needle = label || href;
+  let idx = text.indexOf(needle);
+  if (idx === -1 && !label && href.startsWith("mailto:")) {
     needle = href.slice("mailto:".length);
     idx = text.indexOf(needle);
   }
@@ -113,7 +114,7 @@ async function printTerm(term: HTMLElement) {
   pane.querySelectorAll<HTMLElement>(".ln").forEach((line) => {
     line.textContent = "";
   });
-  const tick = term.closest("#projects") ? 12 : 30;
+  const tick = term.classList.contains("deck") ? 12 : 30;
   await printPane(pane, cancelled, tick);
   if (cancelled()) return;
   delete term.dataset.printing;
@@ -129,35 +130,35 @@ export function startSite(): () => void {
   ).matches;
 
   function bindTabs() {
-    const term = document.querySelector<HTMLElement>("#projects .term");
-    if (!term) return;
-    const tabs = term.querySelectorAll<HTMLElement>(".term-tabs .tab");
-    tabs.forEach((tab) => {
-      tab.addEventListener(
-        "click",
-        async () => {
-          if (stopped) return;
-          const id = tab.dataset.tab;
-          tabs.forEach((item) => {
-            item.classList.toggle("is-on", item === tab);
-            item.setAttribute(
-              "aria-selected",
-              item === tab ? "true" : "false",
-            );
-          });
-          term.querySelectorAll<HTMLElement>(".pane").forEach((pane) => {
-            const on = pane.id === id;
-            pane.classList.toggle("is-on", on);
-            pane.hidden = !on;
-            pane.querySelectorAll<HTMLElement>(".ln").forEach((ln) => {
-              ln.textContent = "";
+    document.querySelectorAll<HTMLElement>(".term.deck").forEach((term) => {
+      const tabs = term.querySelectorAll<HTMLElement>(".term-tabs .tab");
+      tabs.forEach((tab) => {
+        tab.addEventListener(
+          "click",
+          async () => {
+            if (stopped) return;
+            const id = tab.dataset.tab;
+            tabs.forEach((item) => {
+              item.classList.toggle("is-on", item === tab);
+              item.setAttribute(
+                "aria-selected",
+                item === tab ? "true" : "false",
+              );
             });
-          });
-          term.classList.remove("is-printed");
-          await printTerm(term);
-        },
-        { signal },
-      );
+            term.querySelectorAll<HTMLElement>(".pane").forEach((pane) => {
+              const on = pane.id === id;
+              pane.classList.toggle("is-on", on);
+              pane.hidden = !on;
+              pane.querySelectorAll<HTMLElement>(".ln").forEach((ln) => {
+                ln.textContent = "";
+              });
+            });
+            term.classList.remove("is-printed");
+            await printTerm(term);
+          },
+          { signal },
+        );
+      });
     });
   }
 
@@ -225,6 +226,7 @@ export function startSite(): () => void {
       "is-pictured",
     );
     clearTermLines(el);
+    el.style.removeProperty("--wipe-from");
   }
 
   function revealEl(el: HTMLElement) {
@@ -274,6 +276,10 @@ export function startSite(): () => void {
     }
     const token = bumpReveal(el);
     cancelPrint(el);
+    const revealed = el.classList.contains("is-revealed");
+    const current = getComputedStyle(el).getPropertyValue("--wipe").trim();
+    const from = revealed ? "150%" : current || "150%";
+    el.style.setProperty("--wipe-from", from);
     el.classList.remove("is-revealing", "is-revealed");
     el.classList.add("is-unloading");
     if (reduceMotion) {
@@ -328,19 +334,21 @@ export function startSite(): () => void {
     return el.hasAttribute("data-print");
   }
 
-  function hasScrolledPast(el: HTMLElement) {
-    return el.getBoundingClientRect().top < -16;
-  }
-
   function shouldReveal(el: HTMLElement) {
     if (el.matches(".hero-term")) return isInView(el);
     if (el.matches(".term[data-print]")) return isFullyOnScreen(el);
     return isInView(el);
   }
 
+  function isBeyondUnloadZone(el: HTMLElement) {
+    const rect = el.getBoundingClientRect();
+    const viewH = window.innerHeight;
+    const margin = viewH * 0.25;
+    return rect.bottom <= -margin || rect.top >= viewH + margin;
+  }
+
   function shouldConceal(el: HTMLElement) {
-    if (!isInView(el)) return true;
-    return el.closest("#projects") != null && hasScrolledPast(el);
+    return isBeyondUnloadZone(el);
   }
 
   const nodes = Array.from(
@@ -361,7 +369,7 @@ export function startSite(): () => void {
         io.unobserve(el);
       });
     },
-    { threshold: [0, 0.12, 1], rootMargin: "0px" },
+    { threshold: [0, 0.12, 1], rootMargin: "25% 0px" },
   );
 
   function watchReveal() {

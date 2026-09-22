@@ -1,10 +1,90 @@
+@property --fs {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 16px;
+}
+
+@property --lh {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 16px;
+}
+
+@property --term-fs {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 20px;
+}
+
+@property --term-lh {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 20px;
+}
+
+@property --term-pad {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 16px;
+}
+
+@property --hero-term-w {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 420px;
+}
+
+@property --hero-term-min {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 128px;
+}
+
+@property --h1-lh {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 48px;
+}
+
+@property --track {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 2px;
+}
+
+@property --stub-fs {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 12px;
+}
+
+@property --stub-lh {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 12px;
+}
+
+@property --fw {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 400;
+}
+
 :root {
   --unit: 8px;
   --fs: 16px;
   --lh: 16px;
   --term-fs: 20px;
   --term-lh: 20px;
+  --term-pad: 16px;
   --term-bd: 2px;
+  --hero-term-w: 420px;
+  --hero-term-min: 128px;
+  --h1-lh: 48px;
+  --track: 2px;
+  --stub-fs: 12px;
+  --stub-lh: 12px;
+  --fw: 400;
   --bg: #000000;
   --fg: #ffffff;
   --dim: #808080;
@@ -12,6 +92,66 @@
   --edge: #c8c8c8;
   --inset: #4a4a4a;
   --font: var(--font-tiny5), ui-monospace, monospace;
+}
+
+html.ready {
+  transition:
+    --fs 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --lh 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --term-fs 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --term-lh 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --term-pad 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --hero-term-w 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --hero-term-min 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --h1-lh 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --track 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --stub-fs 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    --stub-lh 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.readable {
+  --font: var(--font-readable), ui-monospace, monospace;
+  --fw: 500;
+  image-rendering: auto;
+  --fs: 15px;
+  --lh: 22px;
+  --term-fs: 22px;
+  --term-lh: 30px;
+  --term-pad: 20px;
+  --hero-term-w: 520px;
+  --hero-term-min: 176px;
+  --h1-lh: 56px;
+  --track: 0px;
+  --stub-fs: 14px;
+  --stub-lh: 20px;
+}
+
+html.readable body {
+  font-family: var(--font);
+  font-weight: var(--fw);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: auto;
+  letter-spacing: 0;
+}
+
+html.readable :where(h1, h2, h3) {
+  font-weight: var(--fw);
+}
+
+@keyframes readable-shift {
+  0% {
+    opacity: 0.62;
+    filter: blur(1.1px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+html.is-shifting #site {
+  animation: readable-shift 0.65s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 *,
@@ -37,6 +177,7 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font);
+  font-weight: var(--fw);
   font-size: var(--fs);
   line-height: var(--lh);
   min-height: 100vh;
@@ -234,7 +375,7 @@ button {
 }
 
 [data-reveal].is-unloading {
-  --wipe: 150%;
+  --wipe: var(--wipe-from, 150%);
   -webkit-mask-image: linear-gradient(
     to bottom right,
     #000 -40%,
@@ -288,7 +429,7 @@ button {
 
 @keyframes boot-diag-out {
   from {
-    --wipe: 150%;
+    --wipe: var(--wipe-from, 150%);
   }
   to {
     --wipe: -12%;
@@ -305,6 +446,14 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html.ready {
+    transition: none;
+  }
+
+  html.is-shifting #site {
+    animation: none;
+  }
+
   [data-reveal],
   [data-reveal] * {
     animation: none;
@@ -414,6 +563,11 @@ button.snake-add:disabled {
   cursor: default;
 }
 
+button.readable-toggle.is-on {
+  background: var(--fg);
+  color: var(--bg);
+}
+
 /* --- hero --- */
 
 .hero {
@@ -463,7 +617,7 @@ button.snake-add:disabled {
 .hero-term {
   position: relative;
   flex: 0 0 auto;
-  width: min(420px, 68%);
+  width: min(var(--hero-term-w), 68%);
   max-width: 100%;
   background: var(--bg);
   color: var(--fg);
@@ -491,7 +645,7 @@ button.snake-add:disabled {
 }
 
 .hero-term .term-body {
-  min-height: calc(var(--unit) * 16);
+  min-height: var(--hero-term-min);
 }
 
 .term[data-reveal].is-revealing {
@@ -515,15 +669,15 @@ button.snake-add:disabled {
 }
 
 /* Tabs, frame, and shell share one wipe so the top cannot show early. */
-#projects .term[data-reveal].is-revealing .titlebar,
-#projects .term[data-reveal].is-revealing .term-body,
-#projects .term[data-reveal].is-revealing .term-tabs,
-#projects .term[data-reveal].is-revealing .term-frame {
+.term.deck[data-reveal].is-revealing .titlebar,
+.term.deck[data-reveal].is-revealing .term-body,
+.term.deck[data-reveal].is-revealing .term-tabs,
+.term.deck[data-reveal].is-revealing .term-frame {
   animation-delay: 0s;
 }
 
 /* Stay fully hidden until the wipe starts, including the tab overhang. */
-#projects .term[data-reveal]:not(.is-revealing):not(.is-revealed):not(.is-unloading) {
+.term.deck[data-reveal]:not(.is-revealing):not(.is-revealed):not(.is-unloading) {
   visibility: hidden;
 }
 
@@ -566,8 +720,8 @@ button.snake-add:disabled {
 .hero h1 {
   font-family: var(--font);
   font-size: 48px;
-  line-height: 48px;
-  letter-spacing: 2px;
+  line-height: var(--h1-lh);
+  letter-spacing: var(--track);
   margin-bottom: calc(var(--unit) * 3);
 }
 
@@ -620,7 +774,7 @@ button.snake-add:disabled {
   line-height: var(--lh);
   color: var(--dim);
   margin-bottom: var(--unit);
-  font-weight: 400;
+  font-weight: var(--fw);
 }
 
 /* --- terminals --- */
@@ -640,8 +794,8 @@ button.snake-add:disabled {
   gap: 4px;
   color: var(--dim);
   font-family: var(--font);
-  font-size: 12px;
-  line-height: 12px;
+  font-size: var(--stub-fs);
+  line-height: var(--stub-lh);
   text-align: center;
   pointer-events: none;
   user-select: none;
@@ -652,9 +806,7 @@ button.snake-add:disabled {
   display: block;
 }
 
-.term-slot:has(.term.is-revealed) .term-stub,
-.term-slot:has(.term.is-revealing) .term-stub,
-.term-slot:has(.term.is-unloading) .term-stub {
+.term-slot:has(.term.is-revealed) .term-stub {
   visibility: hidden;
 }
 
@@ -667,7 +819,7 @@ button.snake-add:disabled {
 
 /* Frame and tabs are shifted up-left by the border width. Pull that
    overhang into the terminal box so the diagonal load mask covers it. */
-#projects .term {
+.term.deck {
   padding: var(--term-bd) 0 0 var(--term-bd);
   margin: calc(var(--term-bd) * -1) 0 0 calc(var(--term-bd) * -1);
 }
@@ -692,6 +844,21 @@ button.snake-add:disabled {
   box-shadow: var(--term-bd) var(--term-bd) 0 0 var(--dim);
 }
 
+/* The offset shadow sits outside the border box, so a border-box mask
+   hides it until the wipe class is removed. Stretch the mask over it. */
+.hero-term[data-reveal],
+.term.member[data-reveal],
+.term[data-reveal] .term-frame {
+  -webkit-mask-clip: no-clip;
+  mask-clip: no-clip;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+  -webkit-mask-size: calc(100% + var(--term-bd)) calc(100% + var(--term-bd));
+  mask-size: calc(100% + var(--term-bd)) calc(100% + var(--term-bd));
+}
+
 .term.member {
   --member-shadow: color-mix(in srgb, var(--member-accent) 45%, #ffffff);
   border-color: var(--member-accent);
@@ -700,7 +867,7 @@ button.snake-add:disabled {
 
 .term-body {
   min-height: calc(var(--unit) * 22);
-  padding: calc(var(--unit) * 2);
+  padding: var(--term-pad);
   font-size: var(--term-fs);
   line-height: var(--term-lh);
   box-shadow: inset 1px 1px 0 0 #000000;
@@ -975,9 +1142,16 @@ button:focus-visible,
 /* --- responsive: phones --- */
 
 @media (max-width: 800px) {
+  :root {
+    --h1-lh: 32px;
+  }
+
+  html.readable {
+    --h1-lh: 38px;
+  }
+
   .hero h1 {
     font-size: 32px;
-    line-height: 32px;
   }
 
   .team-row {

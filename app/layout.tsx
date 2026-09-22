@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Tiny5 } from "next/font/google";
+import { IBM_Plex_Mono, Tiny5 } from "next/font/google";
 import "./globals.css";
 
 const tiny5 = Tiny5({
@@ -7,6 +7,13 @@ const tiny5 = Tiny5({
   weight: "400",
   display: "block",
   variable: "--font-tiny5",
+});
+
+const readable = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: "500",
+  display: "swap",
+  variable: "--font-readable",
 });
 
 export const metadata: Metadata = {
@@ -20,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={tiny5.variable}>
+    <html lang="en" className={`${tiny5.variable} ${readable.variable}`}>
       <body className={`booting ${tiny5.className}`}>{children}</body>
     </html>
   );
