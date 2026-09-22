@@ -316,7 +316,7 @@ export default function Home() {
                   <div className="ln" data-k="discord: shyguygamedev" />
                   <div
                     className="ln"
-                    data-k="role:    product positioning, design, code"
+                    data-k="role:    product positioning, code"
                   />
                   <div className="ln" data-k="status:  active" />
                   <div className="ln dim" data-k="tty:     pts/2" />
@@ -349,7 +349,7 @@ export default function Home() {
                   <div className="ln" data-k="$ whoami" />
                   <div className="ln mag" data-k="HF_ang / hucklberi" />
                   <div className="ln" data-k="discord: basicallyahucklberi" />
-                  <div className="ln" data-k="role:    code, design" />
+                  <div className="ln" data-k="role:    code, design, art" />
                   <div className="ln" data-k="status:  active" />
                   <div className="ln dim" data-k="tty:     pts/3" />
                 </div>
