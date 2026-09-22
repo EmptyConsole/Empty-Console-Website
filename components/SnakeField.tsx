@@ -5,6 +5,7 @@ import { useEffect, useRef, type RefObject } from "react";
 const CELL = 16;
 const STROKE = 2;
 const CORNER = 2;
+const RESPAWN_GAP = 160;
 
 type Cell = { x: number; y: number };
 
@@ -14,6 +15,34 @@ type Snake = {
   dir: Cell;
   interval: number;
   acc: number;
+  grow: number;
+  origin: number | null;
+};
+
+type Edge = { x: number; y: number; w: number; h: number };
+
+type Bit = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  delay: number;
+  life: number;
+  rank: number;
+};
+
+type DeathAnim = {
+  color: string;
+  bits: Bit[];
+  origin: number | null;
+  elapsed: number;
+};
+
+type DeathEvent = {
+  color: string;
+  body: Cell[];
+  impact: Cell;
+  origin: number | null;
 };
 
 const PALETTE = [
@@ -38,6 +67,8 @@ const SPECS: {
   { color: "#f5c518", length: 7, interval: 280, dir: { x: -1, y: 0 }, band: 0.52 },
   { color: "#e23b3b", length: 6, interval: 250, dir: { x: 1, y: 0 }, band: 0.76 },
 ];
+
+const RESERVED = new Set(SPECS.map((spec) => spec.color));
 
 function cellKey(cell: Cell) {
   return `${cell.x},${cell.y}`;
@@ -103,7 +134,7 @@ function placeSnake(
 function createSnakes(cols: number, rows: number): Snake[] {
   const occupied = new Set<string>();
   const snakes: Snake[] = [];
-  for (const spec of SPECS) {
+  SPECS.forEach((spec, origin) => {
     const preferredY = Math.min(rows - 1, Math.max(0, Math.floor(rows * spec.band)));
     const body = placeSnake(
       cols,
@@ -113,7 +144,7 @@ function createSnakes(cols: number, rows: number): Snake[] {
       preferredY,
       occupied,
     );
-    if (!body) continue;
+    if (!body) return;
     for (const cell of body) occupied.add(cellKey(cell));
     snakes.push({
       color: spec.color,
@@ -121,20 +152,56 @@ function createSnakes(cols: number, rows: number): Snake[] {
       dir: spec.dir,
       interval: spec.interval,
       acc: 0,
+      grow: 0,
+      origin,
     });
-  }
+  });
   return snakes;
 }
 
-function chooseDir(
-  snake: Snake,
-  occupied: Set<string>,
+function occupiedCells(snakes: Snake[]) {
+  const occupied = new Set<string>();
+  for (const snake of snakes) {
+    for (const cell of snake.body) occupied.add(cellKey(cell));
+  }
+  return occupied;
+}
+
+function spawnOrigin(
+  origin: number,
   cols: number,
   rows: number,
-): Cell | null {
-  const head = snake.body[0];
-  const tail = snake.body[snake.body.length - 1];
-  const tailKey = cellKey(tail);
+  snakes: Snake[],
+): boolean {
+  const spec = SPECS[origin];
+  if (!spec) return true;
+  if (snakes.some((snake) => snake.origin === origin)) return true;
+  const preferredY = Math.min(rows - 1, Math.max(0, Math.floor(rows * spec.band)));
+  const body = placeSnake(
+    cols,
+    rows,
+    spec.length,
+    spec.dir,
+    preferredY,
+    occupiedCells(snakes),
+  );
+  if (!body) return false;
+  snakes.push({
+    color: spec.color,
+    body,
+    dir: spec.dir,
+    interval: spec.interval,
+    acc: 0,
+    grow: 0,
+    origin,
+  });
+  return true;
+}
+
+function chooseDir(snake: Snake, cols: number, rows: number): Cell | null {
+  const self = new Set(snake.body.map(cellKey));
+  const tailKey = cellKey(snake.body[snake.body.length - 1]);
+  const freeTail = snake.grow <= 0;
   const [left, right] = sideDirs(snake.dir);
   const candidates: Cell[] = [];
 
@@ -146,15 +213,47 @@ function chooseDir(
   pushDir(candidates, left);
   pushDir(candidates, right);
 
+  const head = snake.body[0];
   for (const dir of candidates) {
     if (dir.x === -snake.dir.x && dir.y === -snake.dir.y) continue;
     const next = { x: head.x + dir.x, y: head.y + dir.y };
     if (!inGrid(next, cols, rows)) continue;
     const key = cellKey(next);
-    if (occupied.has(key) && key !== tailKey) continue;
+    if (self.has(key) && !(freeTail && key === tailKey)) continue;
     return dir;
   }
   return null;
+}
+
+function tailExtension(snake: Snake): Cell {
+  const tail = snake.body[snake.body.length - 1];
+  const before = snake.body[snake.body.length - 2];
+  if (!before) return { x: tail.x - snake.dir.x, y: tail.y - snake.dir.y };
+  return {
+    x: tail.x + (tail.x - before.x),
+    y: tail.y + (tail.y - before.y),
+  };
+}
+
+function grantGrowth(
+  snake: Snake,
+  amount: number,
+  cellOwner: Map<string, Snake>,
+  cols: number,
+  rows: number,
+) {
+  let left = amount;
+  while (left > 0) {
+    const cell = tailExtension(snake);
+    const key = cellKey(cell);
+    if (!inGrid(cell, cols, rows) || cellOwner.has(key)) {
+      snake.grow += left;
+      return;
+    }
+    snake.body.push(cell);
+    cellOwner.set(key, snake);
+    left -= 1;
+  }
 }
 
 function stepSnakes(
@@ -162,18 +261,21 @@ function stepSnakes(
   dt: number,
   cols: number,
   rows: number,
-) {
-  const occupied = new Set<string>();
+): DeathEvent[] {
+  const deaths: DeathEvent[] = [];
+  const dead = new Set<Snake>();
+  const cellOwner = new Map<string, Snake>();
   for (const snake of snakes) {
-    for (const cell of snake.body) occupied.add(cellKey(cell));
+    for (const cell of snake.body) cellOwner.set(cellKey(cell), snake);
   }
 
   for (const snake of snakes) {
+    if (dead.has(snake)) continue;
     snake.acc += dt;
     if (snake.acc < snake.interval) continue;
     snake.acc -= snake.interval;
 
-    const dir = chooseDir(snake, occupied, cols, rows);
+    const dir = chooseDir(snake, cols, rows);
     if (!dir) {
       const tail = snake.body[snake.body.length - 1];
       const before = snake.body[snake.body.length - 2];
@@ -186,11 +288,111 @@ function stepSnakes(
     const head = snake.body[0];
     const tail = snake.body[snake.body.length - 1];
     const next = { x: head.x + dir.x, y: head.y + dir.y };
-    occupied.delete(cellKey(tail));
-    occupied.add(cellKey(next));
-    snake.body = [next, ...snake.body.slice(0, -1)];
+    const growing = snake.grow > 0;
+    const tailKey = cellKey(tail);
+    if (!growing) cellOwner.delete(tailKey);
+
+    const owner = cellOwner.get(cellKey(next));
+    if (owner && owner !== snake) {
+      for (const cell of snake.body) {
+        if (cellOwner.get(cellKey(cell)) === snake) cellOwner.delete(cellKey(cell));
+      }
+      dead.add(snake);
+      if (!dead.has(owner)) {
+        const bonus = Math.max(1, Math.round(snake.body.length * 0.3));
+        grantGrowth(owner, bonus, cellOwner, cols, rows);
+      }
+      deaths.push({
+        color: snake.color,
+        body: snake.body.map((cell) => ({ x: cell.x, y: cell.y })),
+        impact: next,
+        origin: snake.origin,
+      });
+      continue;
+    }
+
+    if (growing) snake.grow -= 1;
+    snake.body = growing
+      ? [next, ...snake.body]
+      : [next, ...snake.body.slice(0, -1)];
     snake.dir = dir;
+    cellOwner.set(cellKey(next), snake);
   }
+
+  for (let i = snakes.length - 1; i >= 0; i -= 1) {
+    if (dead.has(snakes[i])) snakes.splice(i, 1);
+  }
+  return deaths;
+}
+
+function cellStrokes(cell: Cell, occupied: Set<string>): Edge[] {
+  const n = occupied.has(`${cell.x},${cell.y - 1}`);
+  const e = occupied.has(`${cell.x + 1},${cell.y}`);
+  const s = occupied.has(`${cell.x},${cell.y + 1}`);
+  const w = occupied.has(`${cell.x - 1},${cell.y}`);
+  const convTL = !n && !w && !occupied.has(`${cell.x - 1},${cell.y - 1}`);
+  const convTR = !n && !e && !occupied.has(`${cell.x + 1},${cell.y - 1}`);
+  const convBL = !s && !w && !occupied.has(`${cell.x - 1},${cell.y + 1}`);
+  const convBR = !s && !e && !occupied.has(`${cell.x + 1},${cell.y + 1}`);
+  const x = cell.x * CELL;
+  const y = cell.y * CELL;
+  const edges: Edge[] = [];
+
+  if (!n) {
+    const x0 = x + (convTL ? CORNER : 0);
+    const x1 = x + CELL - (convTR ? CORNER : 0);
+    edges.push({ x: x0, y, w: x1 - x0, h: STROKE });
+  }
+  if (!s) {
+    const x0 = x + (convBL ? CORNER : 0);
+    const x1 = x + CELL - (convBR ? CORNER : 0);
+    edges.push({ x: x0, y: y + CELL - STROKE, w: x1 - x0, h: STROKE });
+  }
+  if (!w) {
+    const y0 = y + (convTL ? CORNER : 0);
+    const y1 = y + CELL - (convBL ? CORNER : 0);
+    edges.push({ x, y: y0, w: STROKE, h: y1 - y0 });
+  }
+  if (!e) {
+    const y0 = y + (convTR ? CORNER : 0);
+    const y1 = y + CELL - (convBR ? CORNER : 0);
+    edges.push({ x: x + CELL - STROKE, y: y0, w: STROKE, h: y1 - y0 });
+  }
+  return edges;
+}
+
+function emitBits(bits: Bit[], edge: Edge, segIndex: number) {
+  for (let y = edge.y; y < edge.y + edge.h; y += 2) {
+    for (let x = edge.x; x < edge.x + edge.w; x += 2) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.012 + Math.random() * 0.028;
+      bits.push({
+        x,
+        y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed + 0.014,
+        delay: segIndex * 34 + Math.random() * 80,
+        life: 420 + Math.random() * 200,
+        rank: Math.random(),
+      });
+    }
+  }
+}
+
+function createDeath(event: DeathEvent): DeathAnim {
+  const bits: Bit[] = [];
+  const occupied = new Set(event.body.map(cellKey));
+  event.body.forEach((cell, index) => {
+    for (const edge of cellStrokes(cell, occupied)) emitBits(bits, edge, index);
+  });
+  if (!occupied.has(cellKey(event.impact))) {
+    for (const edge of cellStrokes(event.impact, new Set())) emitBits(bits, edge, 0);
+  }
+  return { color: event.color, bits, origin: event.origin, elapsed: 0 };
+}
+
+function deathDuration(anim: DeathAnim) {
+  return anim.bits.reduce((max, bit) => Math.max(max, bit.delay + bit.life), 640);
 }
 
 function drawSnakes(ctx: CanvasRenderingContext2D, snakes: Snake[]) {
@@ -198,39 +400,41 @@ function drawSnakes(ctx: CanvasRenderingContext2D, snakes: Snake[]) {
     const occupied = new Set(snake.body.map(cellKey));
     ctx.fillStyle = snake.color;
     for (const cell of snake.body) {
-      const n = occupied.has(`${cell.x},${cell.y - 1}`);
-      const e = occupied.has(`${cell.x + 1},${cell.y}`);
-      const s = occupied.has(`${cell.x},${cell.y + 1}`);
-      const w = occupied.has(`${cell.x - 1},${cell.y}`);
-      const convTL = !n && !w && !occupied.has(`${cell.x - 1},${cell.y - 1}`);
-      const convTR = !n && !e && !occupied.has(`${cell.x + 1},${cell.y - 1}`);
-      const convBL = !s && !w && !occupied.has(`${cell.x - 1},${cell.y + 1}`);
-      const convBR = !s && !e && !occupied.has(`${cell.x + 1},${cell.y + 1}`);
-      const x = cell.x * CELL;
-      const y = cell.y * CELL;
-
-      if (!n) {
-        const x0 = x + (convTL ? CORNER : 0);
-        const x1 = x + CELL - (convTR ? CORNER : 0);
-        ctx.fillRect(x0, y, x1 - x0, STROKE);
-      }
-      if (!s) {
-        const x0 = x + (convBL ? CORNER : 0);
-        const x1 = x + CELL - (convBR ? CORNER : 0);
-        ctx.fillRect(x0, y + CELL - STROKE, x1 - x0, STROKE);
-      }
-      if (!w) {
-        const y0 = y + (convTL ? CORNER : 0);
-        const y1 = y + CELL - (convBL ? CORNER : 0);
-        ctx.fillRect(x, y0, STROKE, y1 - y0);
-      }
-      if (!e) {
-        const y0 = y + (convTR ? CORNER : 0);
-        const y1 = y + CELL - (convBR ? CORNER : 0);
-        ctx.fillRect(x + CELL - STROKE, y0, STROKE, y1 - y0);
+      for (const edge of cellStrokes(cell, occupied)) {
+        ctx.fillRect(edge.x, edge.y, edge.w, edge.h);
       }
     }
   }
+}
+
+function drawDeaths(ctx: CanvasRenderingContext2D, anims: DeathAnim[]) {
+  for (const anim of anims) {
+    ctx.fillStyle = anim.color;
+    for (const bit of anim.bits) {
+      const fadeAt = Math.max(0, bit.delay - 140);
+      if (anim.elapsed < fadeAt) {
+        ctx.globalAlpha = 1;
+        ctx.fillRect(bit.x, bit.y, 2, 2);
+        continue;
+      }
+      if (anim.elapsed < bit.delay) {
+        const span = bit.delay - fadeAt;
+        const progress = span <= 0 ? 1 : (anim.elapsed - fadeAt) / span;
+        if (bit.rank < progress * 0.5) continue;
+        if (bit.rank > 0.84 && Math.floor(anim.elapsed / 48) % 2 === 0) continue;
+        ctx.globalAlpha = 1;
+        ctx.fillRect(bit.x, bit.y, 2, 2);
+        continue;
+      }
+      const travel = anim.elapsed - bit.delay;
+      if (travel >= bit.life) continue;
+      const x = Math.round((bit.x + bit.vx * travel) / 2) * 2;
+      const y = Math.round((bit.y + bit.vy * travel + 0.00002 * travel * travel) / 2) * 2;
+      ctx.globalAlpha = 1 - travel / bit.life;
+      ctx.fillRect(x, y, 2, 2);
+    }
+  }
+  ctx.globalAlpha = 1;
 }
 
 export default function SnakeField({
@@ -256,16 +460,26 @@ export default function SnakeField({
     let cols = 0;
     let rows = 0;
     let snakes: Snake[] = [];
+    let deaths: DeathAnim[] = [];
+    let respawns: { origin: number; left: number }[] = [];
     let last = performance.now();
     let raf = 0;
 
-    const addSnake = () => {
-      const occupied = new Set<string>();
-      for (const snake of snakes) {
-        for (const cell of snake.body) occupied.add(cellKey(cell));
+    const queueRespawn = (origin: number, delay: number) => {
+      if (snakes.some((snake) => snake.origin === origin)) return;
+      const pending = respawns.find((job) => job.origin === origin);
+      if (pending) {
+        pending.left = Math.max(pending.left, delay);
+        return;
       }
+      respawns.push({ origin, left: delay });
+    };
+
+    const addSnake = () => {
+      const occupied = occupiedCells(snakes);
       const used = new Set(snakes.map((snake) => snake.color));
       const color =
+        PALETTE.find((item) => !used.has(item) && !RESERVED.has(item)) ??
         PALETTE.find((item) => !used.has(item)) ??
         PALETTE[snakes.length % PALETTE.length];
       const length = 5 + Math.floor(Math.random() * 3);
@@ -279,6 +493,8 @@ export default function SnakeField({
         dir,
         interval: 240 + Math.floor(Math.random() * 120),
         acc: 0,
+        grow: 0,
+        origin: null,
       });
     };
 
@@ -295,24 +511,66 @@ export default function SnakeField({
       const inside = snakes.filter((snake) =>
         snake.body.every((cell) => inGrid(cell, nextCols, nextRows)),
       );
+      const holdMissingOrigins = () => {
+        for (let origin = 0; origin < SPECS.length; origin += 1) {
+          if (snakes.some((snake) => snake.origin === origin)) continue;
+          queueRespawn(origin, 280);
+        }
+      };
       if (inside.length !== snakes.length) {
-        snakes = inside.length > 0 ? inside : createSnakes(nextCols, nextRows);
-      } else if (snakes.length === 0) {
+        if (inside.length > 0) {
+          for (const snake of snakes) {
+            if (inside.includes(snake)) continue;
+            if (snake.origin !== null) queueRespawn(snake.origin, 280);
+          }
+          snakes = inside;
+        } else {
+          snakes = createSnakes(nextCols, nextRows);
+          deaths = [];
+          respawns = [];
+          holdMissingOrigins();
+        }
+      } else if (snakes.length === 0 && respawns.length === 0) {
         snakes = createSnakes(nextCols, nextRows);
+        holdMissingOrigins();
       }
       cols = nextCols;
       rows = nextRows;
     };
 
     const draw = () => {
+      ctx.globalAlpha = 1;
       ctx.clearRect(0, 0, host.clientWidth, host.clientHeight);
       drawSnakes(ctx, snakes);
+      drawDeaths(ctx, deaths);
     };
 
     const frame = (now: number) => {
       const dt = Math.min(80, now - last);
       last = now;
-      if (!reduceMotion) stepSnakes(snakes, dt, cols, rows);
+      if (!reduceMotion) {
+        const events = stepSnakes(snakes, dt, cols, rows);
+        for (const event of events) deaths.push(createDeath(event));
+
+        const finished: DeathAnim[] = [];
+        for (const anim of deaths) anim.elapsed += dt;
+        deaths = deaths.filter((anim) => {
+          if (anim.elapsed < deathDuration(anim)) return true;
+          finished.push(anim);
+          return false;
+        });
+        for (const anim of finished) {
+          if (anim.origin !== null) queueRespawn(anim.origin, RESPAWN_GAP);
+        }
+
+        respawns = respawns.filter((job) => {
+          job.left -= dt;
+          if (job.left > 0) return true;
+          if (spawnOrigin(job.origin, cols, rows, snakes)) return false;
+          job.left = 280;
+          return true;
+        });
+      }
       draw();
       raf = window.requestAnimationFrame(frame);
     };

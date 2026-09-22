@@ -68,9 +68,69 @@ const HERO_TERMS: {
 
 const READABLE_KEY = "ec-readable";
 
+type Member = {
+  id: string;
+  handle: string;
+  accent: string;
+  avatar: string;
+  alt: string;
+  name: string;
+  discord: string;
+  role: string;
+  tty: string;
+};
+
+const MEMBERS: Member[] = [
+  {
+    id: "emey",
+    handle: "emey",
+    accent: "#2dd4bf",
+    avatar: "/assets/emey.webp",
+    alt: "Emey",
+    name: "Emey / Tooffu",
+    discord: "qorachniuphorbia",
+    role: "music, art, database",
+    tty: "pts/1",
+  },
+  {
+    id: "shyguy",
+    handle: "shyguy",
+    accent: "#e23b3b",
+    avatar: "/assets/shyguy.webp",
+    alt: "ShyGuy",
+    name: "ShyGuy",
+    discord: "shyguygamedev",
+    role: "product positioning, code",
+    tty: "pts/2",
+  },
+  {
+    id: "hucklberi",
+    handle: "hucklberi",
+    accent: "#f5c518",
+    avatar: "/assets/hucklberi.png",
+    alt: "hucklberi",
+    name: "HF_ang / hucklberi",
+    discord: "basicallyahucklberi",
+    role: "code, design, art",
+    tty: "pts/3",
+  },
+];
+
+function shuffleMembers(members: Member[]) {
+  const next = [...members];
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const current = next[i];
+    next[i] = next[j];
+    next[j] = current;
+  }
+  return next;
+}
+
 export default function Home() {
   const [booted, setBooted] = useState(false);
   const [readable, setReadable] = useState(false);
+  const [members, setMembers] = useState(MEMBERS);
   const addSnake = useRef<(() => void) | null>(null);
   const shiftTimer = useRef<number | null>(null);
 
@@ -111,6 +171,10 @@ export default function Home() {
       return next;
     });
   }
+
+  useEffect(() => {
+    setMembers(shuffleMembers(MEMBERS));
+  }, []);
 
   useEffect(() => {
     if (!booted) return;
@@ -403,105 +467,40 @@ export default function Home() {
               # ./usr
             </h2>
             <div className="team-row">
-              <div className="term-slot">
-                <div className="term-stub" aria-hidden="true">
-                  <span>$ whoami</span>
-                  <span>emey</span>
-                </div>
-                <article
-                  className="panel term member"
-                  data-print=""
-                  data-reveal=""
-                  tabIndex={0}
-                  style={{ ["--member-accent" as string]: "#2dd4bf" }}
-                >
-                <div className="titlebar">usr@emey</div>
-                <div className="term-body">
-                  <div className="avatar-frame">
-                    <img
-                      className="avatar"
-                      src="/assets/emey.webp"
-                      alt="Emey"
-                      width={256}
-                      height={256}
-                    />
+              {members.map((member) => (
+                <div className="term-slot" key={member.id}>
+                  <div className="term-stub" aria-hidden="true">
+                    <span>$ whoami</span>
+                    <span>{member.handle}</span>
                   </div>
-                  <div className="ln" data-k="$ whoami" />
-                  <div className="ln mag" data-k="Emey / Tooffu" />
-                  <div className="ln" data-k="discord: qorachniuphorbia" />
-                  <div className="ln" data-k="role:    music, art, database" />
-                  <div className="ln" data-k="status:  active" />
-                  <div className="ln dim" data-k="tty:     pts/1" />
+                  <article
+                    className="panel term member"
+                    data-print=""
+                    data-reveal=""
+                    tabIndex={0}
+                    style={{ ["--member-accent" as string]: member.accent }}
+                  >
+                    <div className="titlebar">usr@{member.handle}</div>
+                    <div className="term-body">
+                      <div className="avatar-frame">
+                        <img
+                          className="avatar"
+                          src={member.avatar}
+                          alt={member.alt}
+                          width={256}
+                          height={256}
+                        />
+                      </div>
+                      <div className="ln" data-k="$ whoami" />
+                      <div className="ln mag" data-k={member.name} />
+                      <div className="ln" data-k={`discord: ${member.discord}`} />
+                      <div className="ln" data-k={`role:    ${member.role}`} />
+                      <div className="ln" data-k="status:  active" />
+                      <div className="ln dim" data-k={`tty:     ${member.tty}`} />
+                    </div>
+                  </article>
                 </div>
-              </article>
-              </div>
-              <div className="term-slot">
-                <div className="term-stub" aria-hidden="true">
-                  <span>$ whoami</span>
-                  <span>shyguy</span>
-                </div>
-                <article
-                  className="panel term member"
-                  data-print=""
-                  data-reveal=""
-                  tabIndex={0}
-                  style={{ ["--member-accent" as string]: "#e23b3b" }}
-                >
-                <div className="titlebar">usr@shyguy</div>
-                <div className="term-body">
-                  <div className="avatar-frame">
-                    <img
-                      className="avatar"
-                      src="/assets/shyguy.webp"
-                      alt="ShyGuy"
-                      width={256}
-                      height={256}
-                    />
-                  </div>
-                  <div className="ln" data-k="$ whoami" />
-                  <div className="ln mag" data-k="ShyGuy" />
-                  <div className="ln" data-k="discord: shyguygamedev" />
-                  <div
-                    className="ln"
-                    data-k="role:    product positioning, code"
-                  />
-                  <div className="ln" data-k="status:  active" />
-                  <div className="ln dim" data-k="tty:     pts/2" />
-                </div>
-              </article>
-              </div>
-              <div className="term-slot">
-                <div className="term-stub" aria-hidden="true">
-                  <span>$ whoami</span>
-                  <span>hucklberi</span>
-                </div>
-                <article
-                  className="panel term member"
-                  data-print=""
-                  data-reveal=""
-                  tabIndex={0}
-                  style={{ ["--member-accent" as string]: "#f5c518" }}
-                >
-                <div className="titlebar">usr@hucklberi</div>
-                <div className="term-body">
-                  <div className="avatar-frame">
-                    <img
-                      className="avatar"
-                      src="/assets/hucklberi.png"
-                      alt="hucklberi"
-                      width={256}
-                      height={256}
-                    />
-                  </div>
-                  <div className="ln" data-k="$ whoami" />
-                  <div className="ln mag" data-k="HF_ang / hucklberi" />
-                  <div className="ln" data-k="discord: basicallyahucklberi" />
-                  <div className="ln" data-k="role:    code, design, art" />
-                  <div className="ln" data-k="status:  active" />
-                  <div className="ln dim" data-k="tty:     pts/3" />
-                </div>
-              </article>
-              </div>
+              ))}
             </div>
           </section>
         </main>

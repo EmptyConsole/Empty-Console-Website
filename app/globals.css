@@ -113,17 +113,12 @@ html.readable {
   --font: var(--font-readable), ui-monospace, monospace;
   --fw: 500;
   image-rendering: auto;
-  --fs: 15px;
-  --lh: 22px;
-  --term-fs: 22px;
-  --term-lh: 30px;
-  --term-pad: 20px;
-  --hero-term-w: 520px;
-  --hero-term-min: 176px;
-  --h1-lh: 56px;
+  /* Plex is wider than Tiny5 at the same px size. These sizes match
+     Tiny5's line length and cap height so the layout stays put. */
+  --fs: 13px;
+  --term-fs: 14px;
   --track: 0px;
-  --stub-fs: 14px;
-  --stub-lh: 20px;
+  --stub-fs: 10px;
 }
 
 html.readable body {
@@ -1144,10 +1139,6 @@ button:focus-visible,
 @media (max-width: 800px) {
   :root {
     --h1-lh: 32px;
-  }
-
-  html.readable {
-    --h1-lh: 38px;
   }
 
   .hero h1 {
