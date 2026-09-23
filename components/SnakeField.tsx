@@ -4,8 +4,10 @@ import { useEffect, useRef, type RefObject } from "react";
 
 const CELL = 16;
 const STROKE = 2;
+const CORNER = 2;
 const INSET = 1;
 const RESPAWN_GAP = 160;
+const SPAWN_EVERY = 2000;
 
 type Cell = { x: number; y: number };
 
@@ -325,17 +327,78 @@ function stepSnakes(
   return deaths;
 }
 
-function cellStrokes(cell: Cell): Edge[] {
-  const x = cell.x * CELL + INSET;
-  const y = cell.y * CELL + INSET;
-  const size = CELL - INSET * 2;
-  const span = size - STROKE * 2;
-  return [
-    { x, y, w: size, h: STROKE },
-    { x, y: y + size - STROKE, w: size, h: STROKE },
-    { x, y: y + STROKE, w: STROKE, h: span },
-    { x: x + size - STROKE, y: y + STROKE, w: STROKE, h: span },
-  ];
+type Side = "n" | "e" | "s" | "w";
+
+type Links = Record<Side, boolean>;
+
+const OPEN: Links = { n: false, e: false, s: false, w: false };
+
+function linkSide(from: Cell, to: Cell | undefined): Side | null {
+  if (!to) return null;
+  if (to.x === from.x && to.y === from.y - 1) return "n";
+  if (to.x === from.x + 1 && to.y === from.y) return "e";
+  if (to.x === from.x && to.y === from.y + 1) return "s";
+  if (to.x === from.x - 1 && to.y === from.y) return "w";
+  return null;
+}
+
+function chainLinks(body: Cell[], index: number): Links {
+  const links: Links = { n: false, e: false, s: false, w: false };
+  const prev = linkSide(body[index], body[index - 1]);
+  const next = linkSide(body[index], body[index + 1]);
+  if (prev) links[prev] = true;
+  if (next) links[next] = true;
+  return links;
+}
+
+function cellStrokes(cell: Cell, links: Links, occupied: Set<string>): Edge[] {
+  const touch: Links = {
+    n: occupied.has(`${cell.x},${cell.y - 1}`),
+    e: occupied.has(`${cell.x + 1},${cell.y}`),
+    s: occupied.has(`${cell.x},${cell.y + 1}`),
+    w: occupied.has(`${cell.x - 1},${cell.y}`),
+  };
+  const inset: Links = {
+    n: !links.n && touch.n,
+    e: !links.e && touch.e,
+    s: !links.s && touch.s,
+    w: !links.w && touch.w,
+  };
+  const pad = {
+    n: inset.n ? INSET : 0,
+    e: inset.e ? INSET : 0,
+    s: inset.s ? INSET : 0,
+    w: inset.w ? INSET : 0,
+  };
+  const convTL = !links.n && !links.w;
+  const convTR = !links.n && !links.e;
+  const convBL = !links.s && !links.w;
+  const convBR = !links.s && !links.e;
+  const x = cell.x * CELL;
+  const y = cell.y * CELL;
+  const edges: Edge[] = [];
+
+  if (!links.n) {
+    const x0 = x + pad.w + (convTL ? CORNER : 0);
+    const x1 = x + CELL - pad.e - (convTR ? CORNER : 0);
+    if (x1 > x0) edges.push({ x: x0, y: y + pad.n, w: x1 - x0, h: STROKE });
+  }
+  if (!links.s) {
+    const x0 = x + pad.w + (convBL ? CORNER : 0);
+    const x1 = x + CELL - pad.e - (convBR ? CORNER : 0);
+    if (x1 > x0) edges.push({ x: x0, y: y + CELL - pad.s - STROKE, w: x1 - x0, h: STROKE });
+  }
+  if (!links.w) {
+    const y0 = y + pad.n + (convTL ? CORNER : 0);
+    const y1 = y + CELL - pad.s - (convBL ? CORNER : 0);
+    if (y1 > y0) edges.push({ x: x + pad.w, y: y0, w: STROKE, h: y1 - y0 });
+  }
+  if (!links.e) {
+    const y0 = y + pad.n + (convTR ? CORNER : 0);
+    const y1 = y + CELL - pad.s - (convBR ? CORNER : 0);
+    if (y1 > y0) edges.push({ x: x + CELL - pad.e - STROKE, y: y0, w: STROKE, h: y1 - y0 });
+  }
+  return edges;
 }
 
 function emitBits(bits: Bit[], edge: Edge, segIndex: number) {
@@ -360,10 +423,14 @@ function createDeath(event: DeathEvent): DeathAnim {
   const bits: Bit[] = [];
   const occupied = new Set(event.body.map(cellKey));
   event.body.forEach((cell, index) => {
-    for (const edge of cellStrokes(cell)) emitBits(bits, edge, index);
+    for (const edge of cellStrokes(cell, chainLinks(event.body, index), occupied)) {
+      emitBits(bits, edge, index);
+    }
   });
   if (!occupied.has(cellKey(event.impact))) {
-    for (const edge of cellStrokes(event.impact)) emitBits(bits, edge, 0);
+    for (const edge of cellStrokes(event.impact, OPEN, new Set())) {
+      emitBits(bits, edge, 0);
+    }
   }
   return { color: event.color, bits, origin: event.origin, elapsed: 0 };
 }
@@ -374,12 +441,13 @@ function deathDuration(anim: DeathAnim) {
 
 function drawSnakes(ctx: CanvasRenderingContext2D, snakes: Snake[]) {
   for (const snake of snakes) {
+    const occupied = new Set(snake.body.map(cellKey));
     ctx.fillStyle = snake.color;
-    for (const cell of snake.body) {
-      for (const edge of cellStrokes(cell)) {
+    snake.body.forEach((cell, index) => {
+      for (const edge of cellStrokes(cell, chainLinks(snake.body, index), occupied)) {
         ctx.fillRect(edge.x, edge.y, edge.w, edge.h);
       }
-    }
+    });
   }
 }
 
@@ -439,6 +507,7 @@ export default function SnakeField({
     let deaths: DeathAnim[] = [];
     let respawns: { origin: number; left: number }[] = [];
     let last = performance.now();
+    let spawnAcc = 0;
     let raf = 0;
 
     const queueRespawn = (origin: number, delay: number) => {
@@ -458,7 +527,7 @@ export default function SnakeField({
         PALETTE.find((item) => !used.has(item) && !RESERVED.has(item)) ??
         PALETTE.find((item) => !used.has(item)) ??
         PALETTE[snakes.length % PALETTE.length];
-      const length = 5 + Math.floor(Math.random() * 3);
+      const length = 4 + Math.floor(Math.random() * 3);
       const dir = Math.random() < 0.5 ? { x: 1, y: 0 } : { x: -1, y: 0 };
       const preferredY = Math.floor(Math.random() * Math.max(1, rows));
       const body = placeSnake(cols, rows, length, dir, preferredY, occupied);
@@ -546,6 +615,12 @@ export default function SnakeField({
           job.left = 280;
           return true;
         });
+
+        spawnAcc += dt;
+        if (spawnAcc >= SPAWN_EVERY) {
+          spawnAcc -= SPAWN_EVERY;
+          addSnake();
+        }
       }
       draw();
       raf = window.requestAnimationFrame(frame);
