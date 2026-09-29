@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Tiny5 } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const tiny5 = Tiny5({
@@ -28,7 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${tiny5.variable} ${readable.variable}`}>
-      <body className={`booting ${tiny5.className}`}>{children}</body>
+      <body className={`booting ${tiny5.className}`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
