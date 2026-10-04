@@ -558,6 +558,43 @@ button.snake-add:disabled {
   cursor: default;
 }
 
+/* Blinks in the new snake's color, in time with its target brackets. */
+button.snake-add.is-spawned {
+  animation: snake-flash 0.6s steps(1, end) both;
+}
+
+button.snake-add.is-full {
+  animation: snake-full 0.32s steps(4, end) both;
+}
+
+@keyframes snake-flash {
+  0%,
+  40% {
+    background: var(--snake-color);
+    border-color: var(--snake-color);
+    outline-color: var(--snake-color);
+    color: var(--bg);
+  }
+  20%,
+  60%,
+  100% {
+    background: var(--bg);
+    color: var(--fg);
+  }
+}
+
+@keyframes snake-full {
+  25% {
+    transform: translateX(-2px);
+    color: var(--dim);
+  }
+  75% {
+    transform: translateX(2px);
+    color: var(--dim);
+  }
+}
+
+button.auto-toggle.is-on,
 button.readable-toggle.is-on {
   background: var(--fg);
   color: var(--bg);
@@ -692,6 +729,70 @@ button.readable-toggle.is-on {
 .hero-term[data-hero="play"].is-revealing .titlebar,
 .hero-term[data-hero="play"].is-revealing .term-body {
   animation-delay: 0.62s;
+}
+
+/* Reopened windows boot straight back in, without the staggered intro. */
+.hero-term[data-reopened].is-revealing {
+  animation-delay: 0s;
+}
+
+.hero-term[data-reopened].is-revealing .titlebar,
+.hero-term[data-reopened].is-revealing .term-body {
+  animation-delay: 0.15s;
+}
+
+.hero-term[data-closed] {
+  pointer-events: none;
+}
+
+.hero-term[data-closed]:not(.is-unloading) {
+  visibility: hidden;
+}
+
+.hero-term .titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--unit);
+  padding-right: 0;
+}
+
+button.term-close {
+  flex: 0 0 auto;
+  width: calc(var(--unit) * 3);
+  height: calc(var(--unit) * 3);
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--bg);
+  background: var(--fg);
+  color: var(--bg);
+  font-family: var(--font);
+  font-size: var(--fs);
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+}
+
+button.term-close:hover,
+button.term-close:focus-visible {
+  background: var(--bg);
+  color: var(--fg);
+  border-color: var(--bg);
+  outline: none;
+  box-shadow: none;
+}
+
+.hero-dock {
+  margin-top: var(--unit);
+  min-height: calc(var(--unit) * 3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--unit);
+  font-size: var(--fs);
+  line-height: var(--lh);
 }
 
 .hero-term:hover,
