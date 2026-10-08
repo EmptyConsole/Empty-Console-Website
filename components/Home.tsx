@@ -114,6 +114,17 @@ const MEMBERS: Member[] = [
     role: "code, design, art",
     tty: "pts/3",
   },
+  {
+    id: "automagicle",
+    handle: "automagicle",
+    accent: "#f59e0b",
+    avatar: "/assets/automagicle.webp",
+    alt: "automagicle",
+    name: "automagicle",
+    discord: "automagicle",
+    role: "code, design",
+    tty: "pts/4",
+  },
 ];
 
 function shuffleMembers(members: Member[]) {
@@ -131,9 +142,6 @@ export default function Home() {
   const [booted, setBooted] = useState(false);
   const [readable, setReadable] = useState(false);
   const [members, setMembers] = useState(MEMBERS);
-  const [autoSnakes, setAutoSnakes] = useState(true);
-  // Only the initial auto run switches itself off once the field is full.
-  const [autoStopsWhenFull, setAutoStopsWhenFull] = useState(true);
   const [closed, setClosed] = useState<HeroTermId[]>([]);
   const [reopened, setReopened] = useState<HeroTermId[]>([]);
   const addSnake = useRef<AddSnake | null>(null);
@@ -248,19 +256,6 @@ export default function Home() {
           </nav>
           <div className="chrome-end">
             <button
-              type="button"
-              className={autoSnakes ? "chip auto-toggle is-on" : "chip auto-toggle"}
-              aria-pressed={autoSnakes}
-              disabled={!booted}
-              title="Automatically add snakes while there are fewer than 15"
-              onClick={() => {
-                setAutoSnakes((prev) => !prev);
-                setAutoStopsWhenFull(false);
-              }}
-            >
-              auto
-            </button>
-            <button
               ref={snakeButton}
               type="button"
               className="chip snake-add"
@@ -288,12 +283,7 @@ export default function Home() {
         </header>
 
         <section id="home" className="hero">
-          {booted ? <SnakeField
-              addRef={addSnake}
-              auto={autoSnakes}
-              stopWhenFull={autoStopsWhenFull}
-              onAutoDone={() => setAutoSnakes(false)}
-            /> : null}
+          {booted ? <SnakeField addRef={addSnake} /> : null}
           <div className="hero-row">
             <div className="hero-copy">
               <p className="kicker" data-k="./empty-console" />

@@ -12,9 +12,9 @@ const BLINK_MS = 360;
 const FADE_MS = 180;
 const LOCK_START = MATERIALIZE_MS - 120;
 const SPAWN_MS = LOCK_START + LOCK_MS + BLINK_MS + FADE_MS;
-// Auto mode keeps the field topped up to this many snakes. On first load it
-// switches itself off once the field is full; turned back on, it stays on.
-const SNAKE_TARGET = 15;
+// The field fills itself up to this many snakes once, then never auto-spawns
+// again; after that, new snakes only come from the + snake button.
+const SNAKE_TARGET = 18;
 // The winner of a collision grows by this share of the loser's length.
 const MEAL_SHARE = 0.5;
 // Snakes longer than this stop steering around themselves and can self-destruct.
@@ -648,22 +648,10 @@ export type AddSnake = () => string | null;
 
 export default function SnakeField({
   addRef,
-  auto,
-  stopWhenFull,
-  onAutoDone,
 }: {
   addRef: RefObject<AddSnake | null>;
-  auto: boolean;
-  stopWhenFull: boolean;
-  onAutoDone: () => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const autoRef = useRef(auto);
-  const stopWhenFullRef = useRef(stopWhenFull);
-  const onAutoDoneRef = useRef(onAutoDone);
-  autoRef.current = auto;
-  stopWhenFullRef.current = stopWhenFull;
-  onAutoDoneRef.current = onAutoDone;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -685,6 +673,7 @@ export default function SnakeField({
     let spawns: SpawnAnim[] = [];
     let last = performance.now();
     let raf = 0;
+    let filling = true;
     let spawnAcc = 0;
 
     // Grid cells sitting under visible content (hero text, open windows).
@@ -810,13 +799,9 @@ export default function SnakeField({
         (anim) => anim.elapsed < spawnDuration(anim) && snakes.includes(anim.snake),
       );
 
-      if (autoRef.current && snakes.length >= SNAKE_TARGET) {
-        spawnAcc = 0;
-        if (stopWhenFullRef.current) {
-          autoRef.current = false;
-          onAutoDoneRef.current();
-        }
-      } else if (autoRef.current) {
+      if (filling && snakes.length >= SNAKE_TARGET) {
+        filling = false;
+      } else if (filling) {
         spawnAcc += dt;
         if (spawnAcc >= SPAWN_EVERY) {
           spawnAcc -= SPAWN_EVERY;

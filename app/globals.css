@@ -594,7 +594,6 @@ button.snake-add.is-full {
   }
 }
 
-button.auto-toggle.is-on,
 button.readable-toggle.is-on {
   background: var(--fg);
   color: var(--bg);
@@ -1140,8 +1139,14 @@ body.booted .member:not(.is-pictured) .avatar-frame {
 
 .team-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: calc(var(--unit) * 2);
+}
+
+@media (max-width: 1200px) {
+  .team-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* --- footer --- */
