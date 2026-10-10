@@ -74,6 +74,7 @@ type Member = {
   accent: string;
   avatar: string;
   alt: string;
+  smooth?: boolean;
   name: string;
   discord: string;
   role: string;
@@ -107,8 +108,9 @@ const MEMBERS: Member[] = [
     id: "hucklberi",
     handle: "hucklberi",
     accent: "#f5c518",
-    avatar: "/assets/hucklberi.png",
+    avatar: "/assets/hucklberi.jpg",
     alt: "hucklberi",
+    smooth: true,
     name: "HF_ang / hucklberi",
     discord: "basicallyahucklberi",
     role: "code, design, art",
@@ -484,7 +486,7 @@ export default function Home() {
                     <div className="term-body">
                       <div className="avatar-frame">
                         <img
-                          className="avatar"
+                          className={member.smooth ? "avatar avatar-smooth" : "avatar"}
                           src={member.avatar}
                           alt={member.alt}
                           width={256}

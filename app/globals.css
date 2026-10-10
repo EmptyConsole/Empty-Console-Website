@@ -908,6 +908,10 @@ button.readable-toggle.is-on {
   image-rendering: -moz-crisp-edges;
 }
 
+.avatar-smooth {
+  image-rendering: auto;
+}
+
 body.booted .member:not(.is-pictured) .avatar-frame {
   opacity: 0;
   animation: none;
