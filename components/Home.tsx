@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import BootOverlay from "@/components/BootOverlay";
-import SnakeField from "@/components/SnakeField";
+import SnakeField, { type AddSnake } from "@/components/SnakeField";
 import { startSite } from "@/lib/site";
 
 type HeroTermId = "contact" | "github" | "play";
@@ -101,7 +101,7 @@ const MEMBERS: Member[] = [
     alt: "ShyGuy",
     name: "ShyGuy",
     discord: "shyguygamedev",
-    role: "product positioning, code",
+    role: "product, strategy, code",
     tty: "pts/2",
   },
   {
@@ -115,6 +115,17 @@ const MEMBERS: Member[] = [
     discord: "basicallyahucklberi",
     role: "code, design, art",
     tty: "pts/3",
+  },
+  {
+    id: "automagicle",
+    handle: "automagicle",
+    accent: "#f59e0b",
+    avatar: "/assets/automagicle.webp",
+    alt: "automagicle",
+    name: "automagicle",
+    discord: "automagicle",
+    role: "code, design",
+    tty: "pts/4",
   },
 ];
 
@@ -133,7 +144,10 @@ export default function Home() {
   const [booted, setBooted] = useState(false);
   const [readable, setReadable] = useState(false);
   const [members, setMembers] = useState(MEMBERS);
-  const addSnake = useRef<(() => void) | null>(null);
+  const [closed, setClosed] = useState<HeroTermId[]>([]);
+  const [reopened, setReopened] = useState<HeroTermId[]>([]);
+  const addSnake = useRef<AddSnake | null>(null);
+  const snakeButton = useRef<HTMLButtonElement>(null);
   const shiftTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -178,6 +192,46 @@ export default function Home() {
     setMembers(shuffleMembers(MEMBERS));
   }, []);
 
+  function closeTerm(id: HeroTermId) {
+    setClosed((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  }
+
+  function reopenTerm(id: HeroTermId) {
+    setClosed((prev) => prev.filter((item) => item !== id));
+    setReopened((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  }
+
+  function flashSnakeButton(color: string | null) {
+    const button = snakeButton.current;
+    if (!button) return;
+    button.classList.remove("is-spawned", "is-full");
+    if (color) button.style.setProperty("--snake-color", color);
+    void button.offsetWidth;
+    button.classList.add(color ? "is-spawned" : "is-full");
+  }
+
+  function spawnSnake() {
+    const hero = document.getElementById("home");
+    const chrome = document.querySelector<HTMLElement>(".chrome");
+    const spawn = () => flashSnakeButton(addSnake.current?.() ?? null);
+    if (!hero) return spawn();
+    // The snakes live in the hero; bring it into view so the spawn is seen.
+    const top = chrome ? chrome.getBoundingClientRect().bottom : 0;
+    const rect = hero.getBoundingClientRect();
+    const visible = Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, top);
+    if (visible >= rect.height * 0.6) return spawn();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    let done = false;
+    const once = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener("scrollend", once);
+      spawn();
+    };
+    window.addEventListener("scrollend", once);
+    window.setTimeout(once, 700);
+  }
+
   useEffect(() => {
     if (!booted) return;
     return startSite();
@@ -204,10 +258,15 @@ export default function Home() {
           </nav>
           <div className="chrome-end">
             <button
+              ref={snakeButton}
               type="button"
               className="chip snake-add"
               disabled={!booted}
-              onClick={() => addSnake.current?.()}
+              title="Spawn a new snake in the background"
+              onClick={spawnSnake}
+              onAnimationEnd={(event) =>
+                event.currentTarget.classList.remove("is-spawned", "is-full")
+              }
             >
               + snake
             </button>
@@ -240,6 +299,22 @@ export default function Home() {
                 <a href="#projects">projects/</a>
                 <a href="#team">usr/</a>
               </p>
+              {/* Always rendered so the hero text doesn't jump when it fills. */}
+              <p className="hero-dock" aria-label="closed windows">
+                {closed.length > 0 ? <span className="dim">closed:</span> : null}
+                {HERO_TERMS.filter((term) => closed.includes(term.id)).map(
+                  (term) => (
+                    <button
+                      key={term.id}
+                      type="button"
+                      className="chip"
+                      onClick={() => reopenTerm(term.id)}
+                    >
+                      open ./{term.id}
+                    </button>
+                  ),
+                )}
+              </p>
             </div>
             <div className="hero-stack" aria-label="links">
               {HERO_TERMS.map((term) => (
@@ -249,8 +324,23 @@ export default function Home() {
                   data-hero={term.id}
                   data-print=""
                   data-reveal=""
+                  {...(closed.includes(term.id) ? { "data-closed": "" } : {})}
+                  {...(reopened.includes(term.id) ? { "data-reopened": "" } : {})}
+                  aria-hidden={closed.includes(term.id) || undefined}
                 >
-                  <div className="titlebar">{term.title}</div>
+                  <div className="titlebar">
+                    <span>{term.title}</span>
+                    <button
+                      type="button"
+                      className="term-close"
+                      aria-label={`close ${term.id} window`}
+                      title="close"
+                      tabIndex={closed.includes(term.id) ? -1 : 0}
+                      onClick={() => closeTerm(term.id)}
+                    >
+                      x
+                    </button>
+                  </div>
                   <div className="term-body">
                     {term.lines.map((line) => (
                       <div

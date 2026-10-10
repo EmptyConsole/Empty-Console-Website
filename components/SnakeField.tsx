@@ -6,8 +6,20 @@ const CELL = 16;
 const STROKE = 2;
 const CORNER = 2;
 const INSET = 1;
-const RESPAWN_GAP = 160;
-const SPAWN_EVERY = 2000;
+const MATERIALIZE_MS = 420;
+const LOCK_MS = 320;
+const BLINK_MS = 360;
+const FADE_MS = 180;
+const LOCK_START = MATERIALIZE_MS - 120;
+const SPAWN_MS = LOCK_START + LOCK_MS + BLINK_MS + FADE_MS;
+// The field fills itself up to this many snakes once, then never auto-spawns
+// again; after that, new snakes only come from the + snake button.
+const SNAKE_TARGET = 18;
+// The winner of a collision grows by this share of the loser's length.
+const MEAL_SHARE = 0.5;
+// Snakes longer than this stop steering around themselves and can self-destruct.
+const SELF_DESTRUCT_LEN = 25;
+const SPAWN_EVERY = 1000;
 
 type Cell = { x: number; y: number };
 
@@ -18,7 +30,7 @@ type Snake = {
   interval: number;
   acc: number;
   grow: number;
-  origin: number | null;
+  hold: number;
 };
 
 type Edge = { x: number; y: number; w: number; h: number };
@@ -36,7 +48,6 @@ type Bit = {
 type DeathAnim = {
   color: string;
   bits: Bit[];
-  origin: number | null;
   elapsed: number;
 };
 
@@ -44,7 +55,21 @@ type DeathEvent = {
   color: string;
   body: Cell[];
   impact: Cell;
-  origin: number | null;
+};
+
+type Spark = {
+  x: number;
+  y: number;
+  dx: number;
+  dy: number;
+  delay: number;
+};
+
+type SpawnAnim = {
+  snake: Snake;
+  sparks: Spark[];
+  lock: boolean;
+  elapsed: number;
 };
 
 const PALETTE = [
@@ -56,6 +81,13 @@ const PALETTE = [
   "#c084fc",
   "#fb923c",
   "#4ade80",
+  "#a3e635",
+  "#22d3ee",
+  "#fda4af",
+  "#818cf8",
+  "#fef08a",
+  "#f0abfc",
+  "#d6d3d1",
 ];
 
 const SPECS: {
@@ -136,7 +168,7 @@ function placeSnake(
 function createSnakes(cols: number, rows: number): Snake[] {
   const occupied = new Set<string>();
   const snakes: Snake[] = [];
-  SPECS.forEach((spec, origin) => {
+  SPECS.forEach((spec) => {
     const preferredY = Math.min(rows - 1, Math.max(0, Math.floor(rows * spec.band)));
     const body = placeSnake(
       cols,
@@ -155,7 +187,7 @@ function createSnakes(cols: number, rows: number): Snake[] {
       interval: spec.interval,
       acc: 0,
       grow: 0,
-      origin,
+      hold: 0,
     });
   });
   return snakes;
@@ -169,39 +201,50 @@ function occupiedCells(snakes: Snake[]) {
   return occupied;
 }
 
-function spawnOrigin(
-  origin: number,
+function padCells(cells: Set<string>, pad: number) {
+  const out = new Set<string>();
+  for (const key of cells) {
+    const [x, y] = key.split(",").map(Number);
+    for (let dy = -pad; dy <= pad; dy += 1) {
+      for (let dx = -pad; dx <= pad; dx += 1) out.add(`${x + dx},${y + dy}`);
+    }
+  }
+  return out;
+}
+
+// Random spot for a new snake, kept clear of other snakes and of whatever
+// covers the canvas, so the spawn is visible. Null when nothing fits.
+function findSpawn(
   cols: number,
   rows: number,
-  snakes: Snake[],
-): boolean {
-  const spec = SPECS[origin];
-  if (!spec) return true;
-  if (snakes.some((snake) => snake.origin === origin)) return true;
-  const preferredY = Math.min(rows - 1, Math.max(0, Math.floor(rows * spec.band)));
-  const body = placeSnake(
-    cols,
-    rows,
-    spec.length,
-    spec.dir,
-    preferredY,
-    occupiedCells(snakes),
-  );
-  if (!body) return false;
-  snakes.push({
-    color: spec.color,
-    body,
-    dir: spec.dir,
-    interval: spec.interval,
-    acc: 0,
-    grow: 0,
-    origin,
-  });
-  return true;
+  length: number,
+  avoid: Set<string>,
+  [yMin, yMax]: [number, number],
+): { body: Cell[]; dir: Cell } | null {
+  for (let tries = 0; tries < 240; tries += 1) {
+    const dir = Math.random() < 0.5 ? { x: 1, y: 0 } : { x: -1, y: 0 };
+    const y = yMin + Math.floor(Math.random() * (yMax - yMin + 1));
+    if (y < 0 || y >= rows) continue;
+    const headX =
+      dir.x > 0
+        ? length - 1 + Math.floor(Math.random() * Math.max(1, cols - length + 1))
+        : Math.floor(Math.random() * Math.max(1, cols - length + 1));
+    const body = trail({ x: headX, y }, length, dir);
+    if (!fits(body, cols, rows, avoid)) continue;
+    // Leave room ahead so it doesn't spawn into an instant crash.
+    const ahead = { x: headX + dir.x * 2, y };
+    if (!inGrid(ahead, cols, rows) || avoid.has(cellKey(ahead))) continue;
+    return { body, dir };
+  }
+  return null;
+}
+
+function canSelfDestruct(snake: Snake) {
+  return snake.body.length > SELF_DESTRUCT_LEN;
 }
 
 function chooseDir(snake: Snake, cols: number, rows: number): Cell | null {
-  const self = new Set(snake.body.map(cellKey));
+  const self = new Set(canSelfDestruct(snake) ? [] : snake.body.map(cellKey));
   const tailKey = cellKey(snake.body[snake.body.length - 1]);
   const freeTail = snake.grow <= 0;
   const [left, right] = sideDirs(snake.dir);
@@ -273,6 +316,10 @@ function stepSnakes(
 
   for (const snake of snakes) {
     if (dead.has(snake)) continue;
+    if (snake.hold > 0) {
+      snake.hold -= dt;
+      continue;
+    }
     snake.acc += dt;
     if (snake.acc < snake.interval) continue;
     snake.acc -= snake.interval;
@@ -294,23 +341,41 @@ function stepSnakes(
     const tailKey = cellKey(tail);
     if (!growing) cellOwner.delete(tailKey);
 
+    // On a collision the longer snake eats the shorter one, whoever ran into
+    // whom, and grows by half its length. Ties go against the one that hit.
+    // Long snakes that run into themselves just die.
+    let meal = 0;
     const owner = cellOwner.get(cellKey(next));
-    if (owner && owner !== snake) {
+    if (owner === snake) {
       for (const cell of snake.body) {
         if (cellOwner.get(cellKey(cell)) === snake) cellOwner.delete(cellKey(cell));
       }
       dead.add(snake);
-      if (!dead.has(owner)) {
-        const bonus = Math.max(1, Math.round(snake.body.length * 0.3));
-        grantGrowth(owner, bonus, cellOwner, cols, rows);
-      }
       deaths.push({
         color: snake.color,
         body: snake.body.map((cell) => ({ x: cell.x, y: cell.y })),
         impact: next,
-        origin: snake.origin,
       });
       continue;
+    }
+    if (owner) {
+      const victim = snake.body.length > owner.body.length ? owner : snake;
+      const eater = victim === snake ? owner : snake;
+      for (const cell of victim.body) {
+        if (cellOwner.get(cellKey(cell)) === victim) cellOwner.delete(cellKey(cell));
+      }
+      dead.add(victim);
+      deaths.push({
+        color: victim.color,
+        body: victim.body.map((cell) => ({ x: cell.x, y: cell.y })),
+        impact: next,
+      });
+      const gain = Math.max(1, Math.round(victim.body.length * MEAL_SHARE));
+      if (eater !== snake) {
+        grantGrowth(eater, gain, cellOwner, cols, rows);
+        continue;
+      }
+      meal = gain;
     }
 
     if (growing) snake.grow -= 1;
@@ -319,6 +384,7 @@ function stepSnakes(
       : [next, ...snake.body.slice(0, -1)];
     snake.dir = dir;
     cellOwner.set(cellKey(next), snake);
+    if (meal > 0) grantGrowth(snake, meal, cellOwner, cols, rows);
   }
 
   for (let i = snakes.length - 1; i >= 0; i -= 1) {
@@ -432,7 +498,7 @@ function createDeath(event: DeathEvent): DeathAnim {
       emitBits(bits, edge, 0);
     }
   }
-  return { color: event.color, bits, origin: event.origin, elapsed: 0 };
+  return { color: event.color, bits, elapsed: 0 };
 }
 
 function deathDuration(anim: DeathAnim) {
@@ -481,10 +547,109 @@ function drawDeaths(ctx: CanvasRenderingContext2D, anims: DeathAnim[]) {
   ctx.globalAlpha = 1;
 }
 
+function spawnDuration(anim: SpawnAnim) {
+  return anim.lock ? SPAWN_MS : MATERIALIZE_MS;
+}
+
+function createSpawn(snake: Snake, lock: boolean): SpawnAnim {
+  const sparks: Spark[] = [];
+  const occupied = new Set(snake.body.map(cellKey));
+  snake.body.forEach((cell, index) => {
+    for (const edge of cellStrokes(cell, chainLinks(snake.body, index), occupied)) {
+      for (let y = edge.y; y < edge.y + edge.h; y += 2) {
+        for (let x = edge.x; x < edge.x + edge.w; x += 2) {
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 16 + Math.random() * 40;
+          sparks.push({
+            x,
+            y,
+            dx: Math.cos(angle) * dist,
+            dy: Math.sin(angle) * dist,
+            delay: index * 18 + Math.random() * 100,
+          });
+        }
+      }
+    }
+  });
+  return { snake, sparks, lock, elapsed: 0 };
+}
+
+function easeOut(t: number) {
+  return 1 - (1 - t) ** 3;
+}
+
+function snap(value: number) {
+  return Math.round(value / 2) * 2;
+}
+
+function drawBracket(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  sx: number,
+  sy: number,
+) {
+  const arm = 8;
+  ctx.fillRect(sx > 0 ? x : x - arm, sy > 0 ? y : y - STROKE, arm, STROKE);
+  ctx.fillRect(sx > 0 ? x : x - STROKE, sy > 0 ? y : y - arm, STROKE, arm);
+}
+
+// New snakes fly together out of scattered pixels, then get a set of
+// target brackets that snap onto them and blink.
+function drawSpawns(ctx: CanvasRenderingContext2D, anims: SpawnAnim[]) {
+  for (const anim of anims) {
+    const { snake, elapsed } = anim;
+    ctx.fillStyle = snake.color;
+
+    if (elapsed < MATERIALIZE_MS) {
+      for (const spark of anim.sparks) {
+        const span = MATERIALIZE_MS - spark.delay;
+        const t = Math.max(0, Math.min(1, (elapsed - spark.delay) / span));
+        if (t <= 0) continue;
+        const k = 1 - easeOut(t);
+        ctx.globalAlpha = 0.35 + 0.65 * t;
+        ctx.fillRect(snap(spark.x + spark.dx * k), snap(spark.y + spark.dy * k), 2, 2);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    if (!anim.lock || elapsed < LOCK_START) continue;
+    const t = elapsed - LOCK_START;
+    const fadeStart = LOCK_MS + BLINK_MS;
+    if (t > LOCK_MS && t < fadeStart && Math.floor((t - LOCK_MS) / 90) % 2 === 1) {
+      continue;
+    }
+    ctx.globalAlpha = t > fadeStart ? Math.max(0, 1 - (t - fadeStart) / FADE_MS) : 1;
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const cell of snake.body) {
+      minX = Math.min(minX, cell.x);
+      minY = Math.min(minY, cell.y);
+      maxX = Math.max(maxX, cell.x);
+      maxY = Math.max(maxY, cell.y);
+    }
+    const pad = snap(4 + 44 * (1 - easeOut(Math.min(1, t / LOCK_MS))));
+    const left = minX * CELL - pad;
+    const top = minY * CELL - pad;
+    const right = (maxX + 1) * CELL + pad;
+    const bottom = (maxY + 1) * CELL + pad;
+    drawBracket(ctx, left, top, 1, 1);
+    drawBracket(ctx, right, top, -1, 1);
+    drawBracket(ctx, left, bottom, 1, -1);
+    drawBracket(ctx, right, bottom, -1, -1);
+    ctx.globalAlpha = 1;
+  }
+}
+
+export type AddSnake = () => string | null;
+
 export default function SnakeField({
   addRef,
 }: {
-  addRef: RefObject<(() => void) | null>;
+  addRef: RefObject<AddSnake | null>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -505,22 +670,47 @@ export default function SnakeField({
     let rows = 0;
     let snakes: Snake[] = [];
     let deaths: DeathAnim[] = [];
-    let respawns: { origin: number; left: number }[] = [];
+    let spawns: SpawnAnim[] = [];
     let last = performance.now();
-    let spawnAcc = 0;
     let raf = 0;
+    let filling = true;
+    let spawnAcc = 0;
 
-    const queueRespawn = (origin: number, delay: number) => {
-      if (snakes.some((snake) => snake.origin === origin)) return;
-      const pending = respawns.find((job) => job.origin === origin);
-      if (pending) {
-        pending.left = Math.max(pending.left, delay);
-        return;
-      }
-      respawns.push({ origin, left: delay });
+    // Grid cells sitting under visible content (hero text, open windows).
+    const coveredCells = () => {
+      const covered = new Set<string>();
+      const origin = host.getBoundingClientRect();
+      const nodes = host.querySelectorAll<HTMLElement>(
+        ".hero-copy > *, .hero-term:not([data-closed]), .scroll-hint",
+      );
+      nodes.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+        const x0 = Math.floor((rect.left - origin.left) / CELL);
+        const x1 = Math.floor((rect.right - origin.left) / CELL);
+        const y0 = Math.floor((rect.top - origin.top) / CELL);
+        const y1 = Math.floor((rect.bottom - origin.top) / CELL);
+        for (let y = y0; y <= y1; y += 1) {
+          for (let x = x0; x <= x1; x += 1) covered.add(`${x},${y}`);
+        }
+      });
+      return covered;
     };
 
-    const addSnake = () => {
+    // Rows of the grid currently on screen (the hero can be taller than the
+    // viewport on phones).
+    const visibleRows = (): [number, number] => {
+      const box = host.getBoundingClientRect();
+      const chrome = document.querySelector<HTMLElement>(".chrome");
+      const top = Math.max(box.top, chrome ? chrome.getBoundingClientRect().bottom : 0);
+      const bottom = Math.min(box.bottom, window.innerHeight);
+      const yMin = Math.max(0, Math.ceil((top - box.top) / CELL));
+      const yMax = Math.min(rows - 1, Math.floor((bottom - box.top) / CELL) - 1);
+      return yMax >= yMin ? [yMin, yMax] : [0, rows - 1];
+    };
+
+    // Button spawns get target brackets; automatic fill spawns don't.
+    const spawnSnake = (lock: boolean) => {
       const occupied = occupiedCells(snakes);
       const used = new Set(snakes.map((snake) => snake.color));
       const color =
@@ -528,20 +718,32 @@ export default function SnakeField({
         PALETTE.find((item) => !used.has(item)) ??
         PALETTE[snakes.length % PALETTE.length];
       const length = 4 + Math.floor(Math.random() * 3);
-      const dir = Math.random() < 0.5 ? { x: 1, y: 0 } : { x: -1, y: 0 };
-      const preferredY = Math.floor(Math.random() * Math.max(1, rows));
-      const body = placeSnake(cols, rows, length, dir, preferredY, occupied);
-      if (!body) return;
-      snakes.push({
+      const clear = padCells(occupied, 3);
+      for (const key of coveredCells()) clear.add(key);
+      let spot = findSpawn(cols, rows, length, clear, visibleRows());
+      if (!spot) {
+        const dir = Math.random() < 0.5 ? { x: 1, y: 0 } : { x: -1, y: 0 };
+        const preferredY = Math.floor(Math.random() * Math.max(1, rows));
+        const body = placeSnake(cols, rows, length, dir, preferredY, occupied);
+        spot = body ? { body, dir } : null;
+      }
+      if (!spot) return null;
+      const snake: Snake = {
         color,
-        body,
-        dir,
+        body: spot.body,
+        dir: spot.dir,
         interval: 240 + Math.floor(Math.random() * 120),
         acc: 0,
         grow: 0,
-        origin: null,
-      });
+        hold: reduceMotion ? 0 : MATERIALIZE_MS,
+      };
+      snakes.push(snake);
+      if (reduceMotion) draw();
+      else spawns.push(createSpawn(snake, lock));
+      return color;
     };
+
+    const addSnake: AddSnake = () => spawnSnake(true);
 
     const resize = () => {
       const cssW = host.clientWidth;
@@ -556,29 +758,13 @@ export default function SnakeField({
       const inside = snakes.filter((snake) =>
         snake.body.every((cell) => inGrid(cell, nextCols, nextRows)),
       );
-      const holdMissingOrigins = () => {
-        for (let origin = 0; origin < SPECS.length; origin += 1) {
-          if (snakes.some((snake) => snake.origin === origin)) continue;
-          queueRespawn(origin, 280);
-        }
-      };
-      if (inside.length !== snakes.length) {
-        if (inside.length > 0) {
-          for (const snake of snakes) {
-            if (inside.includes(snake)) continue;
-            if (snake.origin !== null) queueRespawn(snake.origin, 280);
-          }
-          snakes = inside;
-        } else {
-          snakes = createSnakes(nextCols, nextRows);
-          deaths = [];
-          respawns = [];
-          holdMissingOrigins();
-        }
-      } else if (snakes.length === 0 && respawns.length === 0) {
+      if (inside.length > 0) {
+        snakes = inside;
+      } else {
         snakes = createSnakes(nextCols, nextRows);
-        holdMissingOrigins();
+        deaths = [];
       }
+      spawns = spawns.filter((anim) => snakes.includes(anim.snake));
       cols = nextCols;
       rows = nextRows;
     };
@@ -586,42 +772,43 @@ export default function SnakeField({
     const draw = () => {
       ctx.globalAlpha = 1;
       ctx.clearRect(0, 0, host.clientWidth, host.clientHeight);
-      drawSnakes(ctx, snakes);
+      const forming = new Set(
+        spawns
+          .filter((anim) => anim.elapsed < MATERIALIZE_MS)
+          .map((anim) => anim.snake),
+      );
+      drawSnakes(
+        ctx,
+        forming.size ? snakes.filter((snake) => !forming.has(snake)) : snakes,
+      );
+      drawSpawns(ctx, spawns);
       drawDeaths(ctx, deaths);
     };
 
     const frame = (now: number) => {
       const dt = Math.min(80, now - last);
       last = now;
-      if (!reduceMotion) {
-        const events = stepSnakes(snakes, dt, cols, rows);
-        for (const event of events) deaths.push(createDeath(event));
+      const events = stepSnakes(snakes, dt, cols, rows);
+      for (const event of events) deaths.push(createDeath(event));
 
-        const finished: DeathAnim[] = [];
-        for (const anim of deaths) anim.elapsed += dt;
-        deaths = deaths.filter((anim) => {
-          if (anim.elapsed < deathDuration(anim)) return true;
-          finished.push(anim);
-          return false;
-        });
-        for (const anim of finished) {
-          if (anim.origin !== null) queueRespawn(anim.origin, RESPAWN_GAP);
-        }
+      for (const anim of deaths) anim.elapsed += dt;
+      deaths = deaths.filter((anim) => anim.elapsed < deathDuration(anim));
 
-        respawns = respawns.filter((job) => {
-          job.left -= dt;
-          if (job.left > 0) return true;
-          if (spawnOrigin(job.origin, cols, rows, snakes)) return false;
-          job.left = 280;
-          return true;
-        });
+      for (const anim of spawns) anim.elapsed += dt;
+      spawns = spawns.filter(
+        (anim) => anim.elapsed < spawnDuration(anim) && snakes.includes(anim.snake),
+      );
 
+      if (filling && snakes.length >= SNAKE_TARGET) {
+        filling = false;
+      } else if (filling) {
         spawnAcc += dt;
         if (spawnAcc >= SPAWN_EVERY) {
           spawnAcc -= SPAWN_EVERY;
-          addSnake();
+          spawnSnake(false);
         }
       }
+
       draw();
       raf = window.requestAnimationFrame(frame);
     };

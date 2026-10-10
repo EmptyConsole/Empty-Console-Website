@@ -334,7 +334,12 @@ export function startSite(): () => void {
     return el.hasAttribute("data-print");
   }
 
+  function isClosed(el: HTMLElement) {
+    return el.hasAttribute("data-closed");
+  }
+
   function shouldReveal(el: HTMLElement) {
+    if (isClosed(el)) return false;
     if (el.matches(".hero-term")) return isInView(el);
     if (el.matches(".term[data-print]")) return isFullyOnScreen(el);
     return isInView(el);
@@ -348,7 +353,7 @@ export function startSite(): () => void {
   }
 
   function shouldConceal(el: HTMLElement) {
-    return isBeyondUnloadZone(el);
+    return isClosed(el) || isBeyondUnloadZone(el);
   }
 
   const nodes = Array.from(
@@ -371,27 +376,33 @@ export function startSite(): () => void {
     },
     { threshold: [0, 0.12, 1], rootMargin: "25% 0px" },
   );
+  // Windows closed/reopened from React toggle data-closed.
+  const closeWatch = new MutationObserver((records) => {
+    records.forEach((record) => syncReveal(record.target as HTMLElement));
+  });
+
+  function syncReveal(el: HTMLElement) {
+    if (isReplayable(el)) {
+      if (shouldReveal(el)) revealEl(el);
+      else if (shouldConceal(el)) concealEl(el);
+      return;
+    }
+    if (
+      el.classList.contains("is-revealing") ||
+      el.classList.contains("is-revealed")
+    ) {
+      return;
+    }
+    if (shouldReveal(el)) {
+      revealEl(el);
+      io.unobserve(el);
+    }
+  }
 
   function watchReveal() {
-    const syncReveal = (el: HTMLElement) => {
-      if (isReplayable(el)) {
-        if (shouldReveal(el)) revealEl(el);
-        else if (shouldConceal(el)) concealEl(el);
-        return;
-      }
-      if (
-        el.classList.contains("is-revealing") ||
-        el.classList.contains("is-revealed")
-      ) {
-        return;
-      }
-      if (shouldReveal(el)) {
-        revealEl(el);
-        io.unobserve(el);
-      }
-    };
     nodes.forEach((el) => {
       io.observe(el);
+      closeWatch.observe(el, { attributeFilter: ["data-closed"] });
       syncReveal(el);
     });
     window.addEventListener(
@@ -429,5 +440,6 @@ export function startSite(): () => void {
     stopped = true;
     abort.abort();
     io.disconnect();
+    closeWatch.disconnect();
   };
 }
