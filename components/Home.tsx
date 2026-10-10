@@ -100,7 +100,7 @@ const MEMBERS: Member[] = [
     alt: "ShyGuy",
     name: "ShyGuy",
     discord: "shyguygamedev",
-    role: "product positioning, code",
+    role: "product, strategy, code",
     tty: "pts/2",
   },
   {
