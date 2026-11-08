@@ -108,7 +108,7 @@ const MEMBERS: Member[] = [
     id: "hucklberi",
     handle: "hucklberi",
     accent: "#f5c518",
-    avatar: "/assets/hucklberi.jpg",
+    avatar: "/assets/hucklberi.webp",
     alt: "hucklberi",
     smooth: true,
     name: "HF_ang / hucklberi",
