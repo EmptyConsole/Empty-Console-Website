@@ -410,7 +410,7 @@ export default function Home() {
                       <div className="ln dim" data-k="/empty/meet/empty_console" />
                       <div className="ln" data-k="" />
                       <div className="ln" data-k="name:             Empty Console" />
-                      <div className="ln" data-k="size:             3" />
+                      <div className="ln" data-k="size:             4" />
                       <div
                         className="ln"
                         data-k="current project:  Student Atlas"
@@ -459,7 +459,7 @@ export default function Home() {
             <div className="term-slot">
               <div className="term-stub" aria-hidden="true">
                 <span>$ ls ./projects</span>
-                <span>student_atlas  propose</span>
+                <span>student_atlas  mcstats  propose</span>
               </div>
               <article
                 className="term deck"
@@ -477,6 +477,16 @@ export default function Home() {
                   type="button"
                 >
                   Student Atlas
+                </button>
+                <button
+                  className="tab"
+                  role="tab"
+                  aria-selected="false"
+                  data-tab="p3"
+                  id="tab-p3"
+                  type="button"
+                >
+                  MC Stats
                 </button>
                 <button
                   className="tab"
@@ -522,6 +532,31 @@ export default function Home() {
                       className="ln"
                       data-k="github:  https://github.com/EmptyConsole/Student-Atlas"
                       data-href="https://github.com/EmptyConsole/Student-Atlas"
+                    />
+                  </div>
+                  <div
+                    className="pane"
+                    id="p3"
+                    role="tabpanel"
+                    aria-labelledby="tab-p3"
+                    hidden
+                  >
+                    <div className="ln" data-k="$ cat ./projects/mcstats/README" />
+                    <div className="ln mag" data-k="MC Stats" />
+                    <div className="ln dim" data-k="/empty/projects/mcstats" />
+                    <div className="ln" data-k="" />
+                    <div className="ln" data-k="path:    /empty/projects/mcstats" />
+                    <div className="ln" data-k="status:  live" />
+                    <div className="ln" data-k="type:    website + minecraft mod" />
+                    <div
+                      className="ln"
+                      data-k="readme:  A live page for your Minecraft server. Who played, when, and for how long, plus the chat, every death and every advancement."
+                    />
+                    <div
+                      className="ln"
+                      data-k="site:    https://mcstats.magicle.workers.dev"
+                      data-href="https://mcstats.magicle.workers.dev/"
+                      data-link="https://mcstats.magicle.workers.dev"
                     />
                   </div>
                   <div

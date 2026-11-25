@@ -166,14 +166,43 @@ export function startSite(): () => void {
     const links = document.querySelectorAll<HTMLAnchorElement>(
       '.tabstrip a[href^="#"], .hero-ls a[href^="#"]',
     );
-    const sync = () => {
-      const hash = location.hash || "#home";
-      document.querySelectorAll<HTMLAnchorElement>(".tabstrip .tab").forEach(
-        (link) => {
-          link.classList.toggle("is-on", link.getAttribute("href") === hash);
-        },
-      );
+    const tabs = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>(".tabstrip .tab"),
+    );
+    const mark = (hash: string) => {
+      tabs.forEach((link) => {
+        link.classList.toggle("is-on", link.getAttribute("href") === hash);
+      });
     };
+    const sync = () => mark(location.hash || "#home");
+    // Follow the scroll so the lit tab matches the section on screen.
+    const sections = tabs
+      .map((link) => document.querySelector<HTMLElement>(link.getAttribute("href") ?? ""))
+      .filter((el): el is HTMLElement => el != null);
+    let spyFrame = 0;
+    const spy = () => {
+      spyFrame = 0;
+      const line = chromeBottom() + window.innerHeight * 0.3;
+      const atEnd =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 4;
+      let current = sections[0];
+      if (atEnd) current = sections[sections.length - 1];
+      else {
+        sections.forEach((section) => {
+          if (section.getBoundingClientRect().top <= line) current = section;
+        });
+      }
+      if (current) mark(`#${current.id}`);
+    };
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!spyFrame) spyFrame = requestAnimationFrame(spy);
+      },
+      { passive: true, signal },
+    );
+    signal.addEventListener("abort", () => cancelAnimationFrame(spyFrame));
     links.forEach((link) => {
       link.addEventListener(
         "click",

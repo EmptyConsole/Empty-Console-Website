@@ -1061,16 +1061,21 @@ body.booted .member:not(.is-pictured) .avatar-frame {
   animation: boot-diag-out 0.52s cubic-bezier(0.5, 0, 1, 0.5) both;
 }
 
-.member:nth-child(1).is-pictured.is-revealing .avatar-frame {
-  animation-delay: 0.12s, 0.12s;
+/* Each member sits in its own .term-slot (after the stub), so stagger by slot. */
+.term-slot:nth-child(1) > .member.is-pictured.is-revealing .avatar-frame {
+  animation-delay: 0.08s, 0.08s;
 }
 
-.member:nth-child(2).is-pictured.is-revealing .avatar-frame {
+.term-slot:nth-child(2) > .member.is-pictured.is-revealing .avatar-frame {
+  animation-delay: 0.16s, 0.16s;
+}
+
+.term-slot:nth-child(3) > .member.is-pictured.is-revealing .avatar-frame {
   animation-delay: 0.24s, 0.24s;
 }
 
-.member:nth-child(3).is-pictured.is-revealing .avatar-frame {
-  animation-delay: 0.36s, 0.36s;
+.term-slot:nth-child(4) > .member.is-pictured.is-revealing .avatar-frame {
+  animation-delay: 0.32s, 0.32s;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1277,6 +1282,25 @@ button:focus-visible,
 
   .chrome {
     padding-right: calc(var(--unit) * 2);
+  }
+
+  /* The chrome wraps to two rows here, so land section headings below it. */
+  .hero,
+  .block {
+    scroll-margin-top: calc(var(--unit) * 10);
+  }
+
+  /* Long tab labels wrap; let the tab grow instead of clipping the text. */
+  .term-tabs {
+    align-items: stretch;
+  }
+
+  .term-tabs .tab {
+    height: auto;
+    min-height: calc(var(--unit) * 4);
+    padding: calc(var(--unit) / 2) var(--unit);
+    text-align: center;
+    justify-content: center;
   }
 }
 
